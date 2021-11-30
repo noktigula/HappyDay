@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">HappyDay</string>
+    <string name="time_format_24hrs" translatable="false">%02d:%02d</string>
+</resources>
