@@ -1,12 +1,9 @@
 package com.happyday.android.utils
 
 import android.content.Context
-import android.text.format.DateUtils
 import com.happyday.android.R
-import java.util.concurrent.TimeUnit
+import com.happyday.android.model.AlarmModel
 
-infix fun Int.hours(minutes: Int) : Int {
-    return this * 60 * 60 + minutes
+fun AlarmModel.readableTime(context: Context) : String {
+    return context.resources.getString(R.string.time_format_24hrs, hour, minute)
 }
-
-fun Int.minutes() : Int = this * 60
