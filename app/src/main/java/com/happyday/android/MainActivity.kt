@@ -2,7 +2,6 @@ package com.happyday.android
 
 import android.content.Context
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -17,66 +16,75 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.timepicker.MaterialTimePicker
-import com.happyday.android.model.AlarmModel
-import com.happyday.android.model.SingleAlarm
-import com.happyday.android.model.Weekday
+import com.happyday.android.repository.*
 import com.happyday.android.scheduler.AlarmScheduler
 import com.happyday.android.ui.theme.HappyDayTheme
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.readableTime
+import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
-import com.happyday.android.viewmodel.AllAlarms
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: AlarmsViewModel
+    private val viewModel: AlarmsViewModel by viewModelBuilder {
+        AlarmsViewModel(application, Repo(AlarmsDb.get(application)))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider
-            .AndroidViewModelFactory(application)
-            .create(AlarmsViewModel::class.java)
 
-        setContent {
-            HappyDayTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Button(onClick = {
-                        val picker = MaterialTimePicker.Builder().build()
-                        picker.addOnPositiveButtonClickListener {
-                            loge("Selected ${picker.hour}:${picker.minute}")
-                            val id = UUID.randomUUID()
-                            val alarm = AlarmModel(
-                                id = id,
-                                hour = picker.hour,
-                                minute = picker.minute,
-                                alarms = mapOf(
-                                    Weekday.Tue to SingleAlarm(id, Weekday.Tue, picker.hour, picker.minute),
-                                    Weekday.Wed to SingleAlarm(id, Weekday.Wed, picker.hour, picker.minute)
-                                )
-                            )
-                            viewModel.addAlarm(alarm)
-                            AlarmScheduler(applicationContext).scheduleAlarm(alarm)
+        viewModel.getAlarms().observe(this) { allAlarms ->
+            setContent {
+                HappyDayTheme {
+                    // A surface container using the 'background' color from the theme
+                    Surface(color = MaterialTheme.colors.background) {
+                        Column {
+                            AlarmsList(Modifier.weight(1f), this@MainActivity, allAlarms)
+                            Button(onClick = {
+                                val picker = MaterialTimePicker.Builder().build()
+                                picker.addOnPositiveButtonClickListener {
+                                    loge("Selected ${picker.hour}:${picker.minute}")
+                                    val id = UUID.randomUUID()
+                                    val alarm = AlarmModel(
+                                        id,
+                                        "",
+                                        true,
+                                        null,
+                                        true,
+                                        picker.hour,
+                                        picker.minute,
+                                        alarms = mapOf(
+                                            Weekday.Mon to SingleAlarm(id, Weekday.Mon, picker.hour, picker.minute),
+                                            Weekday.Tue to SingleAlarm(id, Weekday.Tue, picker.hour, picker.minute),
+                                            Weekday.Wed to SingleAlarm(id, Weekday.Wed, picker.hour, picker.minute),
+                                            Weekday.Thu to SingleAlarm(id, Weekday.Thu, picker.hour, picker.minute),
+                                            Weekday.Fri to SingleAlarm(id, Weekday.Fri, picker.hour, picker.minute),
+                                            Weekday.Sat to SingleAlarm(id, Weekday.Sat, picker.hour, picker.minute),
+                                            Weekday.Sun to SingleAlarm(id, Weekday.Sun, picker.hour, picker.minute),
+                                        )
+                                    )
+                                    viewModel.addAlarm(alarm)
+                                }
+                                picker.show(this@MainActivity.supportFragmentManager, "picker")
+                            }) {
+                                Text("Schedule")
+                            }
                         }
-                        picker.show(this.supportFragmentManager, "picker")
-                    }) {
-                        Text("Schedule")
                     }
-                    AlarmsList(this, viewModel.getAlarms().value ?: emptyList())
                 }
             }
         }
+
     }
 }
 
 @Composable
-fun AlarmsList(context: Context, data: List<AlarmModel>) {
-    LazyColumn {
+fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>) {
+    LazyColumn(modifier = modifier) {
         items(data) { item ->
             AlarmRow(context, item)
         }
