@@ -11,7 +11,8 @@ enum class Weekday constructor(val value: Int) {
     Thu(Calendar.THURSDAY),
     Fri(Calendar.FRIDAY),
     Sat(Calendar.SATURDAY),
-    Sun(Calendar.SUNDAY)
+    Sun(Calendar.SUNDAY),
+    None(100)
 }
 
 typealias AllAlarms = List<AlarmModel>

@@ -3,13 +3,15 @@ package com.happyday.android.viewmodel
 import android.app.Application
 import androidx.lifecycle.*
 import com.happyday.android.repository.*
-import com.happyday.android.scheduler.AlarmScheduler
+import com.happyday.android.scheduler.AlarmManagerAlarmScheduler
+import com.happyday.android.scheduler.AlarmPlanner
 import com.happyday.android.utils.loge
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class AlarmsViewModel(app: Application, val repository: Repository) : AndroidViewModel(app) {
     private val alarms: MutableLiveData<AllAlarms> = MutableLiveData()
+    private val planner = AlarmPlanner(AlarmManagerAlarmScheduler(app))
 
     init {
         viewModelScope.launch {
@@ -36,7 +38,7 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
         viewModelScope.launch {
             repository.insert(alarm)
         }
-        AlarmScheduler(getApplication()).scheduleAlarm(alarm)
+        planner.scheduleAlarm(alarm)
         loge("After addAlarm, alarms=${alarms} value=${alarms.value}")
         //TODO move scheduling here as well?
         //TODO add save on disk

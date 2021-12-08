@@ -13,10 +13,11 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
 import com.happyday.android.repository.AlarmsDb
 import com.happyday.android.repository.Repo
-import com.happyday.android.scheduler.AlarmScheduler
+import com.happyday.android.repository.SingleAlarm
+import com.happyday.android.scheduler.AlarmManagerAlarmScheduler
+import com.happyday.android.scheduler.AlarmPlanner
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
@@ -26,11 +27,30 @@ class AlarmActivity: ComponentActivity() {
         AlarmsViewModel(application, Repo(AlarmsDb.get(application)))
     }
 
+    private val planner: AlarmPlanner by lazy {
+        AlarmPlanner(AlarmManagerAlarmScheduler(applicationContext))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loge("AlarmActivity: onCreate 0")
+        requestAppearOnTop()
 
-        loge("AlarmActivity: onCreate 1")
+        // TODO what to do if null?
+        //  create new Alarm for snoozing with default sound and with current hour and minute
+        viewModel.byMinute.observe(this) { alarmsByMinute ->
+            /**
+             * TODO schedule next day if repetetive
+             * If day is null, then non-repetetive
+             * If no days selected when creating alarm, schedules for the same day but next week
+             */
+            val currentAlarm = alarmsByMinute[intent.extras?.getInt("alarm_id")]  // TODO handle null
+            loge("Found alarm: $currentAlarm")
+            setUi(currentAlarm!!)
+            planner.scheduleNext(currentAlarm)
+        }
+    }
+
+    private fun requestAppearOnTop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -38,47 +58,34 @@ class AlarmActivity: ComponentActivity() {
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
                         or
-                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
             )
         }
+    }
 
-        loge("AlarmActivity: onCreate 1")
-        loge("Params: viewModel = $viewModel, intent=$intent, hashCode=${intent.extras?.getInt("alarm_id")}")
-
-        // TODO what to do if null?
-        //  create new Alarm for snoozing with default sound and with current hour and minute
-        viewModel.byMinute.observe(this) { alarmsByMinute ->
-            val currentAlarm = alarmsByMinute[intent.extras?.getInt("alarm_id")] // TODO handle null
-            loge("Found alarm: $currentAlarm")
-            setContent {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally
+    private fun setUi(alarm: SingleAlarm) {
+        setContent {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "This is alert at 9pm!")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Text(text = "This is alert at 9pm!")
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Button(onClick = {
-                            AlarmScheduler(this@AlarmActivity).snoozeAlarm(currentAlarm)
-                        }) {
-                            Text("Snooze")
-                        }
+                    Button(onClick = {
+                        planner.snoozeAlarm(alarm)
+                    }) {
+                        Text("Snooze")
+                    }
 
-                        Button(onClick = {/*TODO handleCancel*/}) {
-                            Text("Stop")
-                        }
+                    Button(onClick = {/*TODO handleCancel*/}) {
+                        Text("Stop")
                     }
                 }
             }
         }
-
-        /**
-         * TODO schedule next day if repetetive
-         * If day is null, then non-repetetive
-         * If no days selected when creating alarm, schedules for the same day but next week
-         */
     }
 }

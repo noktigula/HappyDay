@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelLazy
 import androidx.lifecycle.ViewModelProvider
 import com.happyday.android.R
 import com.happyday.android.repository.AlarmModel
+import java.util.*
 
 fun AlarmModel.readableTime(context: Context) : String {
     return context.resources.getString(R.string.time_format_24hrs, hour, minute)
@@ -30,3 +31,9 @@ inline fun <reified VM : ViewModel> ComponentActivity.viewModelBuilder(
         }
     )
 }
+
+fun Calendar.minute() = get(Calendar.MINUTE)
+fun Calendar.hour() = get(Calendar.HOUR_OF_DAY)
+fun Calendar.day() = get(Calendar.DAY_OF_WEEK)
+
+fun Calendar.isToday(hour: Int, minute: Int) = this.hour() >= hour && this.minute() > minute

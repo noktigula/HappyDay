@@ -68,11 +68,10 @@ dependencies {
     //room
     implementation "androidx.room:room-ktx:$room_version"
     implementation "androidx.room:room-runtime:$room_version"
+    testImplementation 'org.junit.jupiter:junit-jupiter'
     kapt "androidx.room:room-compiler:$room_version"
 
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
-
-
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
