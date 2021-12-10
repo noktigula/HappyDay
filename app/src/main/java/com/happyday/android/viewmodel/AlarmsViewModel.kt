@@ -8,6 +8,7 @@ import com.happyday.android.scheduler.AlarmPlanner
 import com.happyday.android.utils.loge
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.*
 
 class AlarmsViewModel(app: Application, val repository: Repository) : AndroidViewModel(app) {
     private val alarms: MutableLiveData<AllAlarms> = MutableLiveData()
@@ -29,6 +30,10 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
             }
         }
         byMinute
+    }
+
+    fun alarmById(id: UUID?) : AlarmModel? {
+        return alarms.value?.find { it.id == id }
     }
 
     fun getAlarms() : LiveData<AllAlarms> = alarms

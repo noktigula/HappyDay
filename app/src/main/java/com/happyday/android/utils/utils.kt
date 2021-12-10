@@ -3,6 +3,7 @@ package com.happyday.android.utils
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelLazy
 import androidx.lifecycle.ViewModelProvider
@@ -30,6 +31,36 @@ inline fun <reified VM : ViewModel> ComponentActivity.viewModelBuilder(
             }
         }
     )
+}
+
+@MainThread
+inline fun <reified VM : ViewModel> Fragment.viewModelBuilder(
+    noinline provider: ()->VM
+) : Lazy<VM> {
+    return ViewModelLazy(
+        viewModelClass = VM::class,
+        storeProducer = { requireActivity().viewModelStore },
+        factoryProducer = {
+            return@ViewModelLazy object: ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHEKED_CAST")
+                    return provider() as T
+                }
+            }
+        }
+    )
+}
+
+fun nowHourMinute() : Pair<Int, Int> {
+    return Pair(0, 0)
+}
+
+fun alarmTimeOrNow(alarmModel: AlarmModel?) : Pair<Int, Int> {
+    return if (alarmModel == null) {
+        nowHourMinute()
+    } else {
+        Pair(alarmModel.hour, alarmModel.minute)
+    }
 }
 
 fun Calendar.minute() = get(Calendar.MINUTE)

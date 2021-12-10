@@ -14,7 +14,7 @@
         android:testOnly="false"
         android:theme="@style/Theme.HappyDay">
         <activity
-            android:name=".MainActivity"
+            android:name=".alarmslist.AlarmsListActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.HappyDay.NoActionBar">
