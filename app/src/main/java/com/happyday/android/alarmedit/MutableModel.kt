@@ -32,6 +32,11 @@ data class MutableModel(
 
     fun toAlarm() : AlarmModel {
         val id = UUID.randomUUID()
+        val finalAlarms = if (alarms.isEmpty()) {
+            mapOf(Weekday.None to SingleAlarm(id, Weekday.None, hour, minute))
+        } else {
+            alarms.associateWith { day -> SingleAlarm(id, day, hour, minute) }
+        }
         return AlarmModel(
             id ?: UUID.randomUUID(),
             title ?: "",
@@ -40,7 +45,7 @@ data class MutableModel(
             enabled,
             hour,
             minute,
-            alarms.associateWith { day -> SingleAlarm(id, day, hour, minute) }
+            finalAlarms
         )
     }
 }

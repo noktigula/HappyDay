@@ -13,6 +13,15 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
         loge("Scheduled!")
     }
 
+    fun updateAlarm(oldAlarm: AlarmModel, newAlarm: AlarmModel) {
+        cancel(oldAlarm)
+        scheduleAlarm(newAlarm)
+    }
+
+    fun cancel(alarm: AlarmModel) {
+        alarm.alarms.forEach { (_, singleAlarm) -> scheduler.cancel(singleAlarm.hashCode()) }
+    }
+
     //TODO get snooze value from some config to simplify debug / release
     fun snoozeAlarm(alarm:SingleAlarm?) {
         //making a new copy will override any other alarm scheduled at snoozed time

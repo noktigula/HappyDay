@@ -49,4 +49,20 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
         //TODO move scheduling here as well?
         //TODO add save on disk
     }
+
+    fun addOrUpdate(alarm: AlarmModel, selectedId: String?=null) {
+        viewModelScope.launch {
+            val oldAlarm = if (selectedId == null) null else alarms.value?.find { it.id == UUID.fromString(selectedId)}
+            if (oldAlarm != null) {
+                //TODO find previous alarm so planner can cancel all running tasks
+                loge("Modifying old alarm!")
+                planner.updateAlarm(oldAlarm, alarm)
+                repository.update(alarm)
+            } else {
+                loge("Adding new alarm!")
+                planner.scheduleAlarm(alarm)
+                repository.insert(alarm)
+            }
+        }
+    }
 }
