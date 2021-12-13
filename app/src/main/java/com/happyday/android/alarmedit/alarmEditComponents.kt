@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.happyday.android.repository.AlarmModel
@@ -37,6 +35,14 @@ fun createMutableModel(alarm: AlarmModel?, hour: Int, minute: Int) =
         hour = hour,
         minute = minute
     ) else MutableModel.fromAlarm(alarm)
+
+@Composable
+@Preview
+fun EditFormPreview() {
+    AlarmEditForm(alarm = null, onSave = { /*TODO*/ }) {
+        //do nothing
+    }
+}
 
 @Composable
 fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
@@ -66,6 +72,7 @@ fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: ()
                     loge("DaysSelector: $copy")
                     setModel(copy)
                 }
+                VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
             }
         }
     }
@@ -151,10 +158,14 @@ fun DaysSelector(selected: Set<Weekday>, onSelected: (Weekday)->Unit) {
 @Composable
 fun Day(title: String, selected: Boolean, onSelected: ()->Unit) {
     Box(modifier = Modifier
-        .background(color = if(selected) Color.Magenta else Color.White)
+        .background(color = if (selected) Color.Magenta else Color.White)
         .clickable { onSelected() }
     ) {
-        Text(text = title, color = if (selected) Color.White else Color.Black, modifier = Modifier.padding(16.dp))
+        Text(
+            text = title,
+            color = if (selected) Color.White else Color.Black,
+            modifier = Modifier.padding(horizontal= 8.dp, vertical =16.dp)
+        )
     }
 }
 
@@ -164,6 +175,13 @@ fun MelodySelector() {
 }
 
 @Composable
-fun VibrateSelector() {
-
+fun VibrateSelector(checked: Boolean, onChecked: (Boolean)->Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text("Vibrate")
+        Switch(checked = checked, onCheckedChange = onChecked)
+    }
 }
