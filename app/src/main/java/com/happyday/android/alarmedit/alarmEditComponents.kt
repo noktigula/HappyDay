@@ -4,8 +4,10 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.widget.TimePicker
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -26,6 +28,7 @@ import com.happyday.android.utils.alarmTimeOrNow
 import com.happyday.android.utils.nowHourMinute
 import com.happyday.android.R
 import com.happyday.android.alarmedit.MutableModel
+import com.happyday.android.repository.Weekday
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.setTime
 
@@ -39,25 +42,30 @@ fun createMutableModel(alarm: AlarmModel?, hour: Int, minute: Int) =
 fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
     val (hour, minute) = alarmTimeOrNow(alarm)
 
-    val mutableModel = remember {
+    val (mutableModel, setModel) = remember {
         mutableStateOf(createMutableModel(alarm, hour, minute))
     }
 
+    loge("MutableModel = $mutableModel")
     HappyDayTheme {
         Surface(color = MaterialTheme.colors.background) {
             Column {
                 CancelSaveRow(onCancel=onCancel, onSave={
                     loge("onSave, model=${mutableModel.hashCode()}")
-                    onSave(mutableModel.value.toAlarm())
+                    onSave(mutableModel.toAlarm())
                 })
                 HDTimePicker(hour, minute) { hour, minute ->
-                    mutableModel.value.apply {
-                        this.hour = hour
-                        this.minute = minute
-                    }
-                    loge("New mutableModel = ${mutableModel.value.hashCode()}")
+                    setModel(mutableModel.copy(hour = hour, minute = minute))
                 }
-                DaysSelector()
+                DaysSelector(mutableModel.alarms) { selectedDay ->
+                    val copy = mutableModel.copy(alarms = mutableModel.alarms.toMutableSet().apply {
+                        if (!add(selectedDay)) {
+                            remove(selectedDay)
+                        }
+                    })
+                    loge("DaysSelector: $copy")
+                    setModel(copy)
+                }
             }
         }
     }
@@ -124,9 +132,30 @@ fun TimeScroller(max: Int) {
 
 }
 
+/**
+ * @param selected if day is present in set - it's selected
+ */
 @Composable
-fun DaysSelector() {
+fun DaysSelector(selected: Set<Weekday>, onSelected: (Weekday)->Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Weekday.weekdays().forEach { day -> Day(title = day.name, selected = selected.contains(day)) {
+            onSelected(day)
+        }}
+    }
+}
 
+@Composable
+fun Day(title: String, selected: Boolean, onSelected: ()->Unit) {
+    Box(modifier = Modifier
+        .background(color = if(selected) Color.Magenta else Color.White)
+        .clickable { onSelected() }
+    ) {
+        Text(text = title, color = if (selected) Color.White else Color.Black, modifier = Modifier.padding(16.dp))
+    }
 }
 
 @Composable

@@ -12,7 +12,12 @@ enum class Weekday constructor(val value: Int) {
     Fri(Calendar.FRIDAY),
     Sat(Calendar.SATURDAY),
     Sun(Calendar.SUNDAY),
-    None(100)
+    None(100);
+
+    companion object {
+        //TODO add support for i18n
+        fun weekdays() = arrayOf(Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+    }
 }
 
 typealias AllAlarms = List<AlarmModel>

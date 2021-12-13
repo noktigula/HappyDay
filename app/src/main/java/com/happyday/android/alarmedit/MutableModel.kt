@@ -6,7 +6,7 @@ import com.happyday.android.repository.SingleAlarm
 import com.happyday.android.repository.Weekday
 import java.util.*
 
-class MutableModel(
+data class MutableModel(
     var id: UUID? = null,
     var title: String? = "",
     var vibrate: Boolean = false,
@@ -14,7 +14,7 @@ class MutableModel(
     var enabled: Boolean = false,
     var hour: Int,
     var minute: Int,
-    var alarms: Map<Weekday, SingleAlarm> = mutableMapOf()
+    var alarms: MutableSet<Weekday> = mutableSetOf()
 ) {
     companion object {
         fun fromAlarm(model: AlarmModel) =
@@ -26,18 +26,21 @@ class MutableModel(
                 enabled = model.enabled,
                 hour = model.hour,
                 minute = model.minute,
-                alarms = model.alarms
+                alarms = model.alarms.keys.toMutableSet()
             )
     }
 
-    fun toAlarm() = AlarmModel(
-        id ?: UUID.randomUUID(),
-        title ?: "",
-        vibrate,
-        sound,
-        enabled,
-        hour,
-        minute,
-        alarms
-    )
+    fun toAlarm() : AlarmModel {
+        val id = UUID.randomUUID()
+        return AlarmModel(
+            id ?: UUID.randomUUID(),
+            title ?: "",
+            vibrate,
+            sound,
+            enabled,
+            hour,
+            minute,
+            alarms.associateWith { day -> SingleAlarm(id, day, hour, minute) }
+        )
+    }
 }
