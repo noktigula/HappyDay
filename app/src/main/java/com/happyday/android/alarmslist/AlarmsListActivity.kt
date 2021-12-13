@@ -16,6 +16,7 @@ import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
 import java.util.*
+import com.happyday.android.R
 
 class AlarmsListActivity : AppCompatActivity() {
 
@@ -58,7 +59,7 @@ class AlarmsListActivity : AppCompatActivity() {
                             ),
                             onSave = { alarmModel ->
                                 //TODO update exitisting or insert new if needed
-                                loge("onSave! $alarmModel")
+                                loge("onSave! hashCode=${alarmModel.hashCode()} $alarmModel")
                             },
                             onCancel = {
                                 loge("onCancel!")

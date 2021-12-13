@@ -1,6 +1,8 @@
 package com.happyday.android.utils
 
 import android.content.Context
+import android.os.Build
+import android.widget.TimePicker
 import androidx.activity.ComponentActivity
 import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
@@ -52,7 +54,8 @@ inline fun <reified VM : ViewModel> Fragment.viewModelBuilder(
 }
 
 fun nowHourMinute() : Pair<Int, Int> {
-    return Pair(0, 0)
+    val calendar = Calendar.getInstance()
+    return Pair(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE))
 }
 
 fun alarmTimeOrNow(alarmModel: AlarmModel?) : Pair<Int, Int> {
@@ -66,5 +69,16 @@ fun alarmTimeOrNow(alarmModel: AlarmModel?) : Pair<Int, Int> {
 fun Calendar.minute() = get(Calendar.MINUTE)
 fun Calendar.hour() = get(Calendar.HOUR_OF_DAY)
 fun Calendar.day() = get(Calendar.DAY_OF_WEEK)
-
 fun Calendar.isToday(hour: Int, minute: Int) = this.hour() >= hour && this.minute() > minute
+
+fun TimePicker.setTime(hour: Int, minute: Int) {
+    if (isM()) {
+        this.hour = hour
+        this.minute = minute
+    } else {
+        currentHour = hour
+        currentMinute = minute
+    }
+}
+
+fun isM() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
