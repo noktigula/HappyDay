@@ -5,14 +5,17 @@ import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.happyday.android.repository.AlarmsDb
 import com.happyday.android.repository.Repo
 import com.happyday.android.repository.SingleAlarm
@@ -65,27 +68,44 @@ class AlarmActivity: ComponentActivity() {
 
     private fun setUi(alarm: SingleAlarm) {
         setContent {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "This is alert at 9pm!")
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Button(onClick = {
-                        planner.snoozeAlarm(alarm)
-                    }) {
-                        Text("Snooze")
-                    }
+            alarmUi(alarm)
+        }
+    }
 
-                    Button(onClick = {/*TODO handleCancel*/}) {
-                        Text("Stop")
-                    }
+    @Composable
+    fun alarmUi(alarm:SingleAlarm?) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(painterResource(id = R.drawable.image_0), "Motivation picture")
+            Text(stringResource(id = R.string.motivatin_0))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = {
+                    planner.snoozeAlarm(alarm)
+                    finish()
+                }) {
+                    Text("Snooze")
+                }
+
+                Button(onClick = { finish() }) {
+                    Text("Cancel")
                 }
             }
         }
+    }
+
+    @Preview
+    @Composable
+    fun preview() {
+        alarmUi(alarm = null)
     }
 }
