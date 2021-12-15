@@ -52,7 +52,6 @@ fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: ()
         mutableStateOf(createMutableModel(alarm, hour, minute))
     }
 
-    loge("MutableModel = $mutableModel")
     HappyDayTheme {
         Surface(color = MaterialTheme.colors.background) {
             Column {
