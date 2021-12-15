@@ -2,6 +2,7 @@ package com.happyday.android.compose
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,12 +21,12 @@ import com.happyday.android.ui.theme.HappyDayTheme
 import com.happyday.android.utils.readableTime
 
 @Composable
-fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()->Unit) {
+fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()->Unit, onAlarmSelected:(AlarmModel)->Unit) {
     HappyDayTheme {
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
             Column {
-                AlarmsList(Modifier.weight(1f), activity, allAlarms)
+                AlarmsList(Modifier.weight(1f), activity, allAlarms, onAlarmSelected)
                 Button(onClick = onAddAlarm) {
                     Text("Schedule")
                 }
@@ -35,17 +36,21 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
 }
 
 @Composable
-fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>) {
+fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>, onAlarmSelected: (AlarmModel) -> Unit) {
     LazyColumn(modifier = modifier) {
         items(data) { item ->
-            AlarmRow(context, item)
+            AlarmRow(context, item) {
+                onAlarmSelected(item)
+            }
         }
     }
 }
 
 @Composable
-fun AlarmRow(context: Context, item: AlarmModel) {
-    Card {
+fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
+    Card(
+        modifier = Modifier.clickable { onSelected() }
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

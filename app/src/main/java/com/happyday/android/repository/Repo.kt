@@ -32,6 +32,8 @@ class Repo(
     }
 
     override suspend fun update(alarm: AlarmModel) {
-        TODO("Not yet implemented")
+        withContext(dispatcher) {
+            db.alarmsDao().update(alarm)
+        }
     }
 }

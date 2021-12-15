@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
@@ -61,10 +62,15 @@ class AlarmsListActivity : AppCompatActivity() {
                         loge("onAddAlarm called!")
                         navController.navigate("edit")
                     }
-                )
+                ) { alarm ->
+                    navController.navigate("edit?alarmId=${alarm.id}")
+                }
             }
             composable("edit?alarmId={alarmId}",
-                arguments = listOf(navArgument("alarmId") { nullable = true })
+                arguments = listOf(navArgument("alarmId") {
+                    type= NavType.StringType
+                    nullable = true
+                })
             ) { backStackEntry ->
                 val alarmId = backStackEntry.arguments?.getString("alarmId")
                 AlarmEditForm(
@@ -80,7 +86,7 @@ class AlarmsListActivity : AppCompatActivity() {
                         navController.popBackStack()
                     },
                     onCancel = {
-                        loge("onCancel!")
+                        navController.popBackStack()
                     }
                 ) // TODO supply an actual selected model
             }
