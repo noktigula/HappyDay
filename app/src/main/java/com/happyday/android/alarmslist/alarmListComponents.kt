@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.AlarmModel
 import com.happyday.android.repository.AllAlarms
 import com.happyday.android.repository.Weekday
@@ -25,7 +26,7 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
     HappyDayTheme {
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
-            Column {
+            Screen {
                 AlarmsList(Modifier.weight(1f), activity, allAlarms, onAlarmSelected)
                 Button(onClick = onAddAlarm) {
                     Text("Schedule")

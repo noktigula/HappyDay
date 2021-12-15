@@ -26,6 +26,7 @@ import com.happyday.android.utils.alarmTimeOrNow
 import com.happyday.android.utils.nowHourMinute
 import com.happyday.android.R
 import com.happyday.android.alarmedit.MutableModel
+import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.Weekday
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.setTime
@@ -54,7 +55,7 @@ fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: ()
 
     HappyDayTheme {
         Surface(color = MaterialTheme.colors.background) {
-            Column {
+            Screen {
                 CancelSaveRow(onCancel=onCancel, onSave={
                     loge("onSave, model=${mutableModel.hashCode()}")
                     onSave(mutableModel.toAlarm())
