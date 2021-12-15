@@ -14,17 +14,26 @@ val Typography = Typography(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
         ),
+        //alarm time on alarm list card
         h1 = TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight(500),
                 fontSize = 30.sp,
                 color = PrimaryPurple
         ),
+        //weekday on alarm list card
         caption = TextStyle(
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight(500),
                 fontSize = 13.sp,
                 color = SecondaryPurple
+        ),
+        //title on main header
+        h2 = TextStyle(
+                fontFamily = FontFamily.Cursive, // TODO add proper font,
+                fontWeight = FontWeight(400),
+                fontSize = 35.sp,
+                color = HeaderTitleColor
         )
         /* Other default text styles to override
     button = TextStyle(

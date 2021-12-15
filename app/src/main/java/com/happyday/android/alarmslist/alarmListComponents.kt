@@ -2,6 +2,7 @@ package com.happyday.android.compose
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,7 +13,16 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.LinearGradient
+import androidx.compose.ui.res.painterResource
+import com.happyday.android.R
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.AlarmModel
 import com.happyday.android.repository.AllAlarms
@@ -26,7 +36,15 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
             Screen {
-                AlarmsList(Modifier.weight(1f), activity, allAlarms, onAlarmSelected)
+                Header()
+                AlarmsList(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = Spacing.Small.size, horizontal = Spacing.Medium.size),
+                    context = activity,
+                    data = allAlarms,
+                    onAlarmSelected = onAlarmSelected
+                )
                 Button(onClick = onAddAlarm) {
                     Text("Schedule")
                 }
@@ -51,12 +69,17 @@ fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>, onA
 fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
     val shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size)
     Card(
-        modifier = Modifier.clickable { onSelected() }.background(Color.White, shape),
+        modifier = Modifier
+            .clickable { onSelected() }
+            .background(Color.White, shape),
         elevation = Elevation,
         shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(Padding.AlarmCard.size),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(Padding.AlarmCard.size),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -97,21 +120,31 @@ fun WeekdayBox(title: String) {
     return Text(text = title, style=MaterialTheme.typography.caption)
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview() {
-//    HappyDayTheme {
-//        AlarmsList(listOf(
-//                Alarm(AlarmModel(UUID.randomUUID(), "Test", 18 hours 35.minutes(), setOf(Weekday.Mon, Weekday.Tue), enabled = true)) { hrs, min ->
-//                    "18:35"
-//                },
-//        Alarm(AlarmModel(UUID.randomUUID(), "Test 2", 8 hours 0.minutes(), setOf(Weekday.Wed, Weekday.Fri), enabled = true)) { hrs, min ->
-//            "08:00"
-//        },
-//        Alarm(AlarmModel(UUID.randomUUID(), "Test 3", 7 hours 30.minutes(), setOf(Weekday.Sat, Weekday.Sun), enabled = true))  { hrs, min ->
-//            "07:30"
-//        },
-//        ))
-//    }
-//}
+@Composable
+fun Header() {
+    val shape = RoundedCornerShape(bottomStart = RoundCorners.Header.size, bottomEnd = RoundCorners.Header.size)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = shape
+    ) {
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .background(brush = Brush.linearGradient(HeaderGradients))
+            .padding(
+                vertical = Padding.HeaderVertical.size,
+                horizontal = Padding.HeaderHorizontal.size
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Column{
+                Text(text = "Welcome to", style= MaterialTheme.typography.h2, modifier = Modifier.background(Color.Transparent))
+                Text(text = "Happy Day", style= MaterialTheme.typography.h2, modifier = Modifier.background(Color.Transparent))
+            }
+        }
+//        Image(painterResource(id = R.drawable.ic_header), "Header_icon")
+    }
+}
 

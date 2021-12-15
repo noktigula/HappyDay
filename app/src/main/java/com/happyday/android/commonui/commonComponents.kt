@@ -12,11 +12,7 @@ fun Screen(content: @Composable ColumnScope.() -> Unit) {
    Column(modifier = Modifier
        .fillMaxWidth()
        .fillMaxHeight()
-       .background(Color.LightGray)
-       .padding(
-           horizontal = Spacing.Medium.size,
-           vertical = Spacing.Small.size
-       ),
+       .background(Color.LightGray),
        content = content
    )
 }
