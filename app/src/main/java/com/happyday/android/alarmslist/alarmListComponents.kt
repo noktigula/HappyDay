@@ -2,13 +2,12 @@ package com.happyday.android.compose
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,7 +17,7 @@ import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.AlarmModel
 import com.happyday.android.repository.AllAlarms
 import com.happyday.android.repository.Weekday
-import com.happyday.android.ui.theme.HappyDayTheme
+import com.happyday.android.ui.theme.*
 import com.happyday.android.utils.readableTime
 
 @Composable
@@ -43,26 +42,40 @@ fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>, onA
             AlarmRow(context, item) {
                 onAlarmSelected(item)
             }
+            Spacer(modifier = Modifier.height(Padding.BetweenCards.size))
         }
     }
 }
 
 @Composable
 fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
+    val shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size)
     Card(
-        modifier = Modifier.clickable { onSelected() }
+        modifier = Modifier.clickable { onSelected() }.background(Color.White, shape),
+        elevation = Elevation,
+        shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(Padding.AlarmCard.size),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = item.readableTime(context))
+            Text(text = item.readableTime(context), style=MaterialTheme.typography.h1)
             Column (horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = item.title)
                 WeekdaysSelector(selectedWeekdays = item.alarms.keys)
             }
-            Switch(checked = item.enabled, onCheckedChange = {checked -> /*TODO*/})
+            Switch(
+                checked = item.enabled, onCheckedChange = {checked -> /*TODO*/},
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = SwitchThumbEnabled,
+                    checkedTrackColor = SwitchTrackEnabled,
+                    checkedTrackAlpha = 1.0f,
+                    uncheckedThumbColor = SwitchThumbDisabled,
+                    uncheckedTrackColor = SwitchTrackDisabled,
+                    uncheckedTrackAlpha = 1.0f
+                )
+            )
         }
     }
 }
@@ -70,15 +83,18 @@ fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
 @Composable
 fun WeekdaysSelector(selectedWeekdays: Set<Weekday>) {
     Row {
-        Weekday.values().map { WeekdayBox(it.name, selectedWeekdays.contains(it)) { status ->
-            //TODO update status in viewmodel
-        } }
+        Weekday.values().map {
+            if (it in selectedWeekdays) {
+                WeekdayBox(it.name)
+                Spacer(modifier = Modifier.padding(Padding.BetweenSelectedWeekdays.size))
+            }
+        }
     }
 }
 
 @Composable
-fun WeekdayBox(title: String, selected: Boolean, onSelected: (Boolean)->Unit) {
-    return Text(text = title, color = if (selected) Color.Blue else Color.Black)
+fun WeekdayBox(title: String) {
+    return Text(text = title, style=MaterialTheme.typography.caption)
 }
 
 //@Preview(showBackground = true)
