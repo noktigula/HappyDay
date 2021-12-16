@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -28,6 +29,7 @@ import com.happyday.android.R
 import com.happyday.android.alarmedit.MutableModel
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.Weekday
+import com.happyday.android.ui.theme.Spacing
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.setTime
 
@@ -55,7 +57,9 @@ fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: ()
 
     HappyDayTheme {
         Surface(color = MaterialTheme.colors.background) {
-            Screen {
+            Screen(extraModifiers = {
+                padding(horizontal = Spacing.Medium.size)
+            }) {
                 CancelSaveRow(onCancel=onCancel, onSave={
                     loge("onSave, model=${mutableModel.hashCode()}")
                     onSave(mutableModel.toAlarm())
@@ -86,11 +90,11 @@ fun CancelSaveRow(onCancel: ()->Unit, onSave: ()->Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Button(onClick=onCancel) {
-            Text("Cancel")
+        TextButton(onClick=onCancel) {
+            Text(stringResource(id = R.string.dialog_edit_cancel), style = MaterialTheme.typography.body2)
         }
-        Button(onClick=onSave) {
-            Text("Save")
+        TextButton(onClick=onSave) {
+            Text(stringResource(id = R.string.dialog_edit_save), style = MaterialTheme.typography.body2)
         }
     }
 }

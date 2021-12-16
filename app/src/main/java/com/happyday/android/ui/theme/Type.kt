@@ -28,6 +28,12 @@ val Typography = Typography(
                 fontSize = 13.sp,
                 color = SecondaryPurple
         ),
+        body2 = TextStyle(
+                fontFamily = FontFamily.Default,
+                fontWeight = FontWeight(500),
+                fontSize = 15.sp,
+                color = PrimaryPurple
+        ),
         //title on main header
         h2 = TextStyle(
                 fontFamily = FontFamily.Cursive, // TODO add proper font,

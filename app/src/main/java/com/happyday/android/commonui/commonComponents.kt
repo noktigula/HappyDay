@@ -26,12 +26,12 @@ import com.happyday.android.R
 import jp.wasabeef.blurry.Blurry
 
 @Composable
-fun Screen(content: @Composable ColumnScope.() -> Unit) {
+fun Screen(extraModifiers:Modifier.()->Modifier={this}, content: @Composable ColumnScope.() -> Unit) {
    Box(Modifier.fillMaxSize()) {
        Background()
        Column(modifier = Modifier
-           .fillMaxWidth()
-           .fillMaxHeight(),
+           .fillMaxSize()
+           .extraModifiers(),
            content = content
        )
    }
