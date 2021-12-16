@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.res.painterResource
 import com.happyday.android.R
+import com.happyday.android.commonui.Background
 import com.happyday.android.commonui.GradientButton
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.AlarmModel
