@@ -19,5 +19,7 @@ val Gradient0 = Color(0xFFEFC7BF)
 val Gradient1 = Color(0xFFB531CD)
 val Gradient2 = Color(0xFF7A29E9)
 
+val DaySelectorDisabled = Color(0xFFDED4ED)
+
 val HeaderGradients = listOf(Gradient2, Gradient1, Gradient0)
 val HeaderTitleColor = Color(0xFFEECDCC)

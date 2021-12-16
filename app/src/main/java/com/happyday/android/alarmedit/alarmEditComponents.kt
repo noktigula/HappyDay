@@ -15,7 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +31,8 @@ import com.happyday.android.R
 import com.happyday.android.alarmedit.MutableModel
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.Weekday
+import com.happyday.android.ui.theme.DaySelectorDisabled
+import com.happyday.android.ui.theme.HeaderGradients
 import com.happyday.android.ui.theme.Spacing
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.setTime
@@ -162,7 +166,7 @@ fun DaysSelector(selected: Set<Weekday>, onSelected: (Weekday)->Unit) {
 @Composable
 fun Day(title: String, selected: Boolean, onSelected: ()->Unit) {
     Box(modifier = Modifier
-        .background(color = if (selected) Color.Magenta else Color.White)
+        .bgColor(selected)
         .clickable { onSelected() }
     ) {
         Text(
@@ -170,6 +174,14 @@ fun Day(title: String, selected: Boolean, onSelected: ()->Unit) {
             color = if (selected) Color.White else Color.Black,
             modifier = Modifier.padding(horizontal= 8.dp, vertical =16.dp)
         )
+    }
+}
+
+fun Modifier.bgColor(selected:Boolean) = composed {
+    if (selected) {
+        background(brush = Brush.linearGradient(HeaderGradients))
+    } else {
+        background(color = DaySelectorDisabled)
     }
 }
 
