@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.res.painterResource
 import com.happyday.android.R
+import com.happyday.android.commonui.GradientButton
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.AlarmModel
 import com.happyday.android.repository.AllAlarms
@@ -36,17 +37,20 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
             Screen {
-                Header()
-                AlarmsList(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = Spacing.Small.size, horizontal = Spacing.Medium.size),
-                    context = activity,
-                    data = allAlarms,
-                    onAlarmSelected = onAlarmSelected
-                )
-                Button(onClick = onAddAlarm) {
-                    Text("Schedule")
+                Box(Modifier.fillMaxSize()) {
+                    AlarmsList(
+                        modifier = Modifier.fillMaxSize(),
+                        context = activity,
+                        data = allAlarms,
+                        onAlarmSelected = onAlarmSelected
+                    )
+
+                    GradientButton(
+                        modifier = Modifier.align(Alignment.BottomCenter).background(Color.Transparent).padding(bottom = Spacing.Small.size),
+                        onClick = onAddAlarm
+                    ) {
+                        Text("     +     ", color = Color.White)
+                    }
                 }
             }
         }
@@ -56,6 +60,10 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
 @Composable
 fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>, onAlarmSelected: (AlarmModel) -> Unit) {
     LazyColumn(modifier = modifier) {
+        item {
+            Header()
+            Spacer(modifier = Modifier.height(Spacing.Small.size))
+        }
         items(data) { item ->
             AlarmRow(context, item) {
                 onAlarmSelected(item)
@@ -70,6 +78,7 @@ fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
     val shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size)
     Card(
         modifier = Modifier
+            .padding(horizontal = Spacing.Medium.size)
             .clickable { onSelected() }
             .background(Color.White, shape),
         elevation = Elevation,
