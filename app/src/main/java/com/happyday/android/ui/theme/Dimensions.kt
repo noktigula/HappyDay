@@ -14,11 +14,13 @@ sealed class Padding(@Dimension val size: Dp) {
     object AlarmCard: Padding(25.dp)
     object BetweenCards: Padding(12.dp)
     object BetweenSelectedWeekdays: Padding(2.dp)
-    object HeaderVertical: Padding(50.dp)
+    object HeaderVertical: Padding(30.dp)
     object HeaderHorizontal: Padding(10.dp)
 }
 
 val Elevation = 4.dp
+
+val HeaderSize = 100.dp
 
 sealed class RoundCorners(@Dimension val size: Dp) {
     object AlarmCard: RoundCorners(25.dp)

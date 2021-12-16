@@ -143,8 +143,13 @@ fun Header() {
                 Text(text = "Welcome to", style= MaterialTheme.typography.h2, modifier = Modifier.background(Color.Transparent))
                 Text(text = "Happy Day", style= MaterialTheme.typography.h2, modifier = Modifier.background(Color.Transparent))
             }
+            Spacer(Modifier.width(Spacing.Medium.size))
+            Image(modifier = Modifier.height(HeaderSize).width(HeaderSize),
+                painter = painterResource(id = R.drawable.ic_header),
+                contentDescription = "Header_icon"
+            )
         }
-//        Image(painterResource(id = R.drawable.ic_header), "Header_icon")
+
     }
 }
 
