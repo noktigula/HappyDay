@@ -40,7 +40,6 @@ class AlarmActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestAppearOnTop()
 
-        loge("AlarmActivity!")
         // TODO what to do if null?
         //  create new Alarm for snoozing with default sound and with current hour and minute
         viewModel.byMinute.observe(this) { alarmsByMinute ->

@@ -75,11 +75,8 @@ fun AlarmEditForm(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> 
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
         val data = activityResult.data
-        loge("Activity result: resCode?${activityResult.resultCode == RESULT_OK}; data=$data")
         if (activityResult.resultCode == RESULT_OK && data != null) {
-            val uri: Uri? = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-            loge("Selected uri=${uri}")
-            setModel(mutableModel.copy(sound = uri))
+            setModel(mutableModel.copy(sound = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)))
         }
     }
 

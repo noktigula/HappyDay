@@ -107,13 +107,10 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
     }
 
     private fun soundTitle(soundUri: Uri?) : String {
-        loge("Resolving title: uri=${soundUri}")
         val context = getApplication<Application>()
         return if (soundUri == null || soundUri == RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)) {
-            loge("default!")
             context.getString(R.string.melody_default)
         } else {
-            loge("Custom! ${RingtoneManager.getRingtone(context, soundUri).getTitle(context)}")
             RingtoneManager.getRingtone(context, soundUri).getTitle(context)
         }
     }
