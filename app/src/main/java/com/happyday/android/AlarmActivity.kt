@@ -1,5 +1,7 @@
 package com.happyday.android
 
+import android.media.Ringtone
+import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
@@ -38,6 +40,7 @@ class AlarmActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestAppearOnTop()
 
+        loge("AlarmActivity!")
         // TODO what to do if null?
         //  create new Alarm for snoozing with default sound and with current hour and minute
         viewModel.byMinute.observe(this) { alarmsByMinute ->
@@ -48,7 +51,10 @@ class AlarmActivity: ComponentActivity() {
              */
             val currentAlarm = alarmsByMinute[intent.extras?.getInt("alarm_id")]  // TODO handle null
             loge("Found alarm: $currentAlarm")
-            setUi(currentAlarm!!)
+            val parent = viewModel.alarmById(currentAlarm?.parentId) ?: viewModel.newAlarm()
+            val ringtone = RingtoneManager.getRingtone(applicationContext, parent.model.sound)
+            ringtone.play()
+            setUi(currentAlarm!!, ringtone)
             planner.scheduleNext(currentAlarm)
         }
     }
@@ -66,14 +72,25 @@ class AlarmActivity: ComponentActivity() {
         }
     }
 
-    private fun setUi(alarm: SingleAlarm) {
+    private fun setUi(alarm: SingleAlarm, ringtone:Ringtone) {
         setContent {
-            alarmUi(alarm)
+            alarmUi(
+                alarm = alarm,
+                onSnooze = {
+                    planner.snoozeAlarm(alarm)
+                    ringtone.stop()
+                    finish()
+                },
+                onStop = {
+                    ringtone.stop()
+                    finish()
+                }
+            )
         }
     }
 
     @Composable
-    fun alarmUi(alarm:SingleAlarm?) {
+    fun alarmUi(alarm:SingleAlarm?, onSnooze: ()->Unit, onStop:()->Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,14 +106,11 @@ class AlarmActivity: ComponentActivity() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = {
-                    planner.snoozeAlarm(alarm)
-                    finish()
-                }) {
+                Button(onClick = onSnooze) {
                     Text("Snooze")
                 }
 
-                Button(onClick = { finish() }) {
+                Button(onClick = onStop) {
                     Text("Cancel")
                 }
             }
@@ -106,6 +120,6 @@ class AlarmActivity: ComponentActivity() {
     @Preview
     @Composable
     fun preview() {
-        alarmUi(alarm = null)
+        alarmUi(alarm = null, onSnooze = {}, onStop = {})
     }
 }
