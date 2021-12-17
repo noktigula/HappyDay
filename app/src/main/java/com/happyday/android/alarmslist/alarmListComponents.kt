@@ -31,9 +31,10 @@ import com.happyday.android.repository.AllAlarms
 import com.happyday.android.repository.Weekday
 import com.happyday.android.ui.theme.*
 import com.happyday.android.utils.readableTime
+import com.happyday.android.viewmodel.AlarmUi
 
 @Composable
-fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()->Unit, onAlarmSelected:(AlarmModel)->Unit) {
+fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlarm:()->Unit, onAlarmSelected:(AlarmUi)->Unit) {
     HappyDayTheme {
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
@@ -59,14 +60,14 @@ fun ListContent(activity: AppCompatActivity, allAlarms: AllAlarms, onAddAlarm:()
 }
 
 @Composable
-fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmModel>, onAlarmSelected: (AlarmModel) -> Unit) {
+fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmUi>, onAlarmSelected: (AlarmUi) -> Unit) {
     LazyColumn(modifier = modifier) {
         item {
             Header()
             Spacer(modifier = Modifier.height(Spacing.Small.size))
         }
         items(data) { item ->
-            AlarmRow(context, item) {
+            AlarmRow(context, item.model) {
                 onAlarmSelected(item)
             }
             Spacer(modifier = Modifier.height(Padding.BetweenCards.size))

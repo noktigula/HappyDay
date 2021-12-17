@@ -1,8 +1,14 @@
 package com.happyday.android.compose
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.view.LayoutInflater
 import android.widget.TimePicker
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,18 +30,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.happyday.android.repository.AlarmModel
-import com.happyday.android.ui.theme.HappyDayTheme
-import com.happyday.android.utils.alarmTimeOrNow
-import com.happyday.android.utils.nowHourMinute
 import com.happyday.android.R
 import com.happyday.android.alarmedit.MutableModel
 import com.happyday.android.commonui.Screen
 import com.happyday.android.repository.Weekday
-import com.happyday.android.ui.theme.DaySelectorDisabled
-import com.happyday.android.ui.theme.HeaderGradients
-import com.happyday.android.ui.theme.Spacing
-import com.happyday.android.utils.loge
-import com.happyday.android.utils.setTime
+import com.happyday.android.ui.theme.*
+import com.happyday.android.utils.*
+import com.happyday.android.viewmodel.AlarmUi
+import java.util.*
 
 fun createMutableModel(alarm: AlarmModel?, hour: Int, minute: Int) =
     if (alarm == null) MutableModel(
@@ -46,18 +48,42 @@ fun createMutableModel(alarm: AlarmModel?, hour: Int, minute: Int) =
 @Composable
 @Preview
 fun EditFormPreview() {
-    AlarmEditForm(alarm = null, onSave = { /*TODO*/ }) {
+    AlarmEditForm(alarm = AlarmUi(
+        model = AlarmModel(
+            id = UUID.randomUUID(),
+            title = "",
+            vibrate = true,
+            sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+            enabled = true,
+            hour = 12,
+            minute = 24,
+            alarms = mutableMapOf()
+        ),
+        soundTitle = { "Default" }
+    ), onSave = { /*TODO*/ }) {
         //do nothing
     }
 }
 
 @Composable
-fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
-    val (hour, minute) = alarmTimeOrNow(alarm)
+fun AlarmEditForm(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
+    val (hour, minute) = alarmTimeOrNow(alarm.model)
 
     val (mutableModel, setModel) = remember {
-        mutableStateOf(createMutableModel(alarm, hour, minute))
+        mutableStateOf(createMutableModel(alarm.model, hour, minute))
     }
+
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
+        val data = activityResult.data
+        loge("Activity result: resCode?${activityResult.resultCode == RESULT_OK}; data=$data")
+        if (activityResult.resultCode == RESULT_OK && data != null) {
+            val uri: Uri? = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+            loge("Selected uri=${uri}")
+            setModel(mutableModel.copy(sound = uri))
+        }
+    }
+
+    val ringtonePickerTitle = stringResource(id = R.string.alarm_picker_title)
 
     HappyDayTheme {
         Surface(color = MaterialTheme.colors.background) {
@@ -81,6 +107,9 @@ fun AlarmEditForm(alarm: AlarmModel?, onSave: (AlarmModel) -> Unit, onCancel: ()
                     setModel(copy)
                 }
                 VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
+                MelodySelector(title =alarm.soundTitle(mutableModel.sound)) {
+                    launcher.launch(ringtonePickerIntent(ringtonePickerTitle, mutableModel.sound))
+                }
             }
         }
     }
@@ -186,8 +215,26 @@ fun Modifier.bgColor(selected:Boolean) = composed {
 }
 
 @Composable
-fun MelodySelector() {
-
+fun MelodySelector(title: String, onClick:()->Unit) {
+    val shape = RoundedCornerShape(Padding.MelodySelector.size)
+    Card(
+        shape = shape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.Large.size),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start,
+        ) {
+            Text(stringResource(id = R.string.melody_selector_title), style=MaterialTheme.typography.body2)
+            Spacer(modifier = Modifier.height(Spacing.XSmall.size))
+            Text(title, style=MaterialTheme.typography.caption)
+        }
+    }
 }
 
 @Composable

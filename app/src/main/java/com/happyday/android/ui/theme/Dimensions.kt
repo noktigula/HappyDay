@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 sealed class Spacing(@Dimension val size:Dp) {
+    object XSmall: Spacing(4.dp)
     object Small: Spacing(8.dp)
     object Medium: Spacing(16.dp)
     object Large: Spacing(24.dp)
@@ -16,6 +17,7 @@ sealed class Padding(@Dimension val size: Dp) {
     object BetweenSelectedWeekdays: Padding(2.dp)
     object HeaderVertical: Padding(30.dp)
     object HeaderHorizontal: Padding(10.dp)
+    object MelodySelector: Padding(AlarmCard.size)
 }
 
 val Elevation = 4.dp

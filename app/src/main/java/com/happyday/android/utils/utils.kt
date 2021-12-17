@@ -1,6 +1,9 @@
 package com.happyday.android.utils
 
 import android.content.Context
+import android.content.Intent
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.widget.TimePicker
@@ -83,3 +86,11 @@ fun TimePicker.setTime(hour: Int, minute: Int) {
 }
 
 fun isM() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+
+fun ringtonePickerIntent(title: String, uri: Uri?) = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+    putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+    putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, title)
+    putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, uri)
+    putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+    putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+}

@@ -22,6 +22,7 @@ import java.util.*
 import com.happyday.android.R
 import com.happyday.android.utils.isM
 import com.happyday.android.utils.requestOverlayPermission
+import com.happyday.android.viewmodel.AlarmUi
 
 class AlarmsListActivity : AppCompatActivity() {
 
@@ -50,7 +51,7 @@ class AlarmsListActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun alarmsList(alarms: AllAlarms) {
+    private fun alarmsList(alarms: List<AlarmUi>) {
         @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "list" ) {
@@ -63,7 +64,7 @@ class AlarmsListActivity : AppCompatActivity() {
                         navController.navigate("edit")
                     }
                 ) { alarm ->
-                    navController.navigate("edit?alarmId=${alarm.id}")
+                    navController.navigate("edit?alarmId=${alarm.model.id}")
                 }
             }
             composable("edit?alarmId={alarmId}",
@@ -78,7 +79,7 @@ class AlarmsListActivity : AppCompatActivity() {
                         if (alarmId != null) {
                             UUID.fromString(alarmId)
                         } else null
-                    ),
+                    ) ?: viewModel.newAlarm(),
                     onSave = { alarmModel ->
                         //TODO update exitisting or insert new if needed
                         loge("onSave! hashCode=${alarmModel.hashCode()} $alarmModel")
