@@ -86,6 +86,8 @@ fun TimePicker.setTime(hour: Int, minute: Int) {
 }
 
 fun isM() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+fun isS() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+fun isO() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
 fun ringtonePickerIntent(title: String, uri: Uri?) = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
     putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)

@@ -1,9 +1,9 @@
 package com.happyday.android
 
+import android.content.Context
 import android.media.Ringtone
 import android.media.RingtoneManager
-import android.os.Build
-import android.os.Bundle
+import android.os.*
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,14 +18,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.happyday.android.repository.AlarmModel
 import com.happyday.android.repository.AlarmsDb
 import com.happyday.android.repository.Repo
 import com.happyday.android.repository.SingleAlarm
 import com.happyday.android.scheduler.AlarmManagerAlarmScheduler
 import com.happyday.android.scheduler.AlarmPlanner
+import com.happyday.android.utils.HDVibrator
+import com.happyday.android.utils.isS
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
+
+private typealias RingtoneStop = ()->Unit
+private typealias VibrateStop = ()->Unit
 
 class AlarmActivity: ComponentActivity() {
     private val viewModel: AlarmsViewModel by viewModelBuilder {
@@ -51,11 +57,33 @@ class AlarmActivity: ComponentActivity() {
             val currentAlarm = alarmsByMinute[intent.extras?.getInt("alarm_id")]  // TODO handle null
             loge("Found alarm: $currentAlarm")
             val parent = viewModel.alarmById(currentAlarm?.parentId) ?: viewModel.newAlarm()
-            val ringtone = RingtoneManager.getRingtone(applicationContext, parent.model.sound)
-            ringtone.play()
-            setUi(currentAlarm!!, ringtone)
+
+            val musicStop = playMusic(parent.model)
+            val vibratorStop = vibrate(parent.model)
+
+            setUi(currentAlarm!!) {
+                musicStop()
+                vibratorStop()
+            }
+
             planner.scheduleNext(currentAlarm)
         }
+    }
+
+    private fun playMusic(model: AlarmModel) : RingtoneStop {
+        val ringtone = RingtoneManager.getRingtone(applicationContext, model.sound)
+        ringtone.play()
+        return ringtone::stop
+    }
+
+    private fun vibrate(model: AlarmModel) : VibrateStop  {
+        if (!model.vibrate) {
+            return {}
+        }
+
+        val vibrator = HDVibrator.getVibrator(this)
+        vibrator.vibrate()
+        return vibrator::stop
     }
 
     private fun requestAppearOnTop() {
@@ -71,17 +99,17 @@ class AlarmActivity: ComponentActivity() {
         }
     }
 
-    private fun setUi(alarm: SingleAlarm, ringtone:Ringtone) {
+    private fun setUi(alarm: SingleAlarm, turnOff:()->Unit) {
         setContent {
             alarmUi(
                 alarm = alarm,
                 onSnooze = {
                     planner.snoozeAlarm(alarm)
-                    ringtone.stop()
+                    turnOff()
                     finish()
                 },
                 onStop = {
-                    ringtone.stop()
+                    turnOff()
                     finish()
                 }
             )
