@@ -48,10 +48,11 @@ fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlar
                     )
 
                     GradientButton(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
+                        extraModifiers = {
+                            align(Alignment.BottomCenter)
                             .background(Color.Transparent)
-                            .padding(bottom = Spacing.Small.size),
+                            .padding(bottom = Spacing.Small.size)
+                        },
                         onClick = onAddAlarm
                     ) {
                         Text("     +     ", color = Color.White)

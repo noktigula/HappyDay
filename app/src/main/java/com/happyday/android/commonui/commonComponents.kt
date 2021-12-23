@@ -38,9 +38,9 @@ fun Screen(extraModifiers:Modifier.()->Modifier={this}, content: @Composable Col
 }
 
 @Composable
-fun GradientButton(modifier: Modifier, onClick: ()->Unit, content: @Composable RowScope.()->Unit) {
+fun GradientButton(extraModifiers:Modifier.()->Modifier={this}, onClick: ()->Unit, content: @Composable RowScope.()->Unit) {
     val shape = RoundedCornerShape(RoundCorners.GradientButton.size)
-    Surface(modifier = modifier, shape = shape) {
+    Surface(modifier = Modifier.extraModifiers(), shape = shape) {
         Row(
             modifier = Modifier
                 .clickable { onClick() }
