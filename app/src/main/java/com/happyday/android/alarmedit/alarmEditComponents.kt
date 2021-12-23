@@ -103,15 +103,23 @@ fun AlarmEditForm(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> 
                     loge("DaysSelector: $copy")
                     setModel(copy)
                 }
-                VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
+
+                VerticalSpacing()
+
                 MelodySelector(title =alarm.soundTitle(mutableModel.sound)) {
                     launcher.launch(ringtonePickerIntent(ringtonePickerTitle, mutableModel.sound))
                 }
+
+                VerticalSpacing()
+
+                VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
             }
         }
     }
-
 }
+
+@Composable
+fun VerticalSpacing() = Spacer(modifier = Modifier.height(Spacing.Small.size))
 
 @Composable
 fun CancelSaveRow(onCancel: ()->Unit, onSave: ()->Unit) {
@@ -252,12 +260,20 @@ fun MelodySelector(title: String, onClick:()->Unit) {
 
 @Composable
 fun VibrateSelector(checked: Boolean, onChecked: (Boolean)->Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onChecked(!checked) }
     ) {
-        Text("Vibrate")
-        Switch(checked = checked, onCheckedChange = onChecked)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.Large.size),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(stringResource(id = R.string.vibrate_selector_title), style=MaterialTheme.typography.body2)
+            Switch(checked = checked, onCheckedChange = onChecked, colors = happyDaySwitch())
+        }
     }
 }

@@ -19,4 +19,5 @@
     <string name="day_title_sat">Сб</string>
     <string name="day_title_sun">Вс</string>
     <string name="day_title_none" />
+    <string name="vibrate_selector_title">Вибрация</string>
 </resources>

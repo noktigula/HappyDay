@@ -48,7 +48,10 @@ fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlar
                     )
 
                     GradientButton(
-                        modifier = Modifier.align(Alignment.BottomCenter).background(Color.Transparent).padding(bottom = Spacing.Small.size),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .background(Color.Transparent)
+                            .padding(bottom = Spacing.Small.size),
                         onClick = onAddAlarm
                     ) {
                         Text("     +     ", color = Color.White)
@@ -101,14 +104,7 @@ fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
             }
             Switch(
                 checked = item.enabled, onCheckedChange = {checked -> /*TODO*/},
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = SwitchThumbEnabled,
-                    checkedTrackColor = SwitchTrackEnabled,
-                    checkedTrackAlpha = 1.0f,
-                    uncheckedThumbColor = SwitchThumbDisabled,
-                    uncheckedTrackColor = SwitchTrackDisabled,
-                    uncheckedTrackAlpha = 1.0f
-                )
+                colors = happyDaySwitch()
             )
         }
     }
@@ -155,7 +151,9 @@ fun Header() {
                 Text(text = "Happy Day", style= MaterialTheme.typography.h2, modifier = Modifier.background(Color.Transparent))
             }
             Spacer(Modifier.width(Spacing.Medium.size))
-            Image(modifier = Modifier.height(HeaderSize).width(HeaderSize),
+            Image(modifier = Modifier
+                .height(HeaderSize)
+                .width(HeaderSize),
                 painter = painterResource(id = R.drawable.ic_header),
                 contentDescription = "Header_icon"
             )

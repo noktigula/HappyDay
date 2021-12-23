@@ -1,5 +1,8 @@
 package com.happyday.android.ui.theme
 
+import androidx.compose.material.SwitchColors
+import androidx.compose.material.SwitchDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val Purple200 = Color(0xFFBB86FC)
@@ -23,3 +26,13 @@ val DaySelectorDisabled = Color(0xFFDED4ED)
 
 val HeaderGradients = listOf(Gradient2, Gradient1, Gradient0)
 val HeaderTitleColor = Color(0xFFEECDCC)
+
+@Composable
+fun happyDaySwitch() = SwitchDefaults.colors(
+    checkedThumbColor = SwitchThumbEnabled,
+    checkedTrackColor = SwitchTrackEnabled,
+    checkedTrackAlpha = 1.0f,
+    uncheckedThumbColor = SwitchThumbDisabled,
+    uncheckedTrackColor = SwitchTrackDisabled,
+    uncheckedTrackAlpha = 1.0f
+)
