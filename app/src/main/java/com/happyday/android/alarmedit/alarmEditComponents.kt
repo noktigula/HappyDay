@@ -183,23 +183,39 @@ fun DaysSelector(selected: Set<Weekday>, onSelected: (Weekday)->Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Weekday.weekdays().forEach { day -> Day(title = day.name, selected = selected.contains(day)) {
+        Weekday.weekdays().forEach { day -> Day(title = stringResource(id = dayTitle(day)), selected = selected.contains(day)) {
             onSelected(day)
         }}
     }
 }
 
+private fun dayTitle(day: Weekday) = when(day) {
+    Weekday.Mon -> R.string.day_title_mon
+    Weekday.Tue -> R.string.day_title_tue
+    Weekday.Wed -> R.string.day_title_wed
+    Weekday.Thu -> R.string.day_title_thu
+    Weekday.Fri -> R.string.day_title_fri
+    Weekday.Sat -> R.string.day_title_sat
+    Weekday.Sun -> R.string.day_title_sun
+    else -> R.string.day_title_none
+}
+
 @Composable
 fun Day(title: String, selected: Boolean, onSelected: ()->Unit) {
-    Box(modifier = Modifier
-        .bgColor(selected)
-        .clickable { onSelected() }
+    val shape = RoundedCornerShape(size = RoundCorners.DaySelector.size)
+    Card(
+        shape = shape
     ) {
-        Text(
-            text = title,
-            color = if (selected) Color.White else Color.Black,
-            modifier = Modifier.padding(horizontal= 8.dp, vertical =16.dp)
-        )
+        Box(modifier = Modifier
+            .bgColor(selected)
+            .clickable { onSelected() }
+        ) {
+            Text(
+                text = title,
+                color = if (selected) Color.White else Color.Black,
+                modifier = Modifier.padding(horizontal= 8.dp, vertical =16.dp)
+            )
+        }
     }
 }
 

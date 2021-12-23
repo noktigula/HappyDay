@@ -27,6 +27,7 @@ val HeaderSize = 100.dp
 sealed class RoundCorners(@Dimension val size: Dp) {
     object AlarmCard: RoundCorners(25.dp)
     object Header: RoundCorners(40.dp)
+    object DaySelector: RoundCorners(10.dp)
 
     object GradientButton: RoundCorners(50.dp)
 }

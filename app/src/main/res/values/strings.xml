@@ -11,4 +11,12 @@
     <string name="melody_selector_title">Мелодия</string>
     <string name="melody_default">По умолчанию</string>
     <string name="alarm_picker_title">Выберите мелодию:</string>
+    <string name="day_title_mon">Пн</string>
+    <string name="day_title_tue">Вт</string>
+    <string name="day_title_wed">Ср</string>
+    <string name="day_title_thu">Чт</string>
+    <string name="day_title_fri">Пт</string>
+    <string name="day_title_sat">Сб</string>
+    <string name="day_title_sun">Вс</string>
+    <string name="day_title_none" />
 </resources>
