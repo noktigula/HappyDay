@@ -1,5 +1,6 @@
 package com.happyday.android.ui.theme
 
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.SwitchColors
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.runtime.Composable
@@ -35,4 +36,11 @@ fun happyDaySwitch() = SwitchDefaults.colors(
     uncheckedThumbColor = SwitchThumbDisabled,
     uncheckedTrackColor = SwitchTrackDisabled,
     uncheckedTrackAlpha = 1.0f
+)
+
+@Composable
+fun happyDayCheckbox() = CheckboxDefaults.colors(
+    checkedColor = SwitchTrackDisabled,
+    uncheckedColor = SwitchTrackDisabled,
+    checkmarkColor = SwitchThumbEnabled
 )

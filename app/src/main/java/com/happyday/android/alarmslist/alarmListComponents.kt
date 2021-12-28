@@ -194,7 +194,7 @@ fun DeletableAlarmRow(context: Context, selected: Boolean, item: AlarmModel, onS
         context = context,
         item = item,
         boxComposable = {
-            Checkbox(checked = selected, onCheckedChange = { onSelected() })
+            Checkbox(checked = selected, onCheckedChange = { onSelected() }, colors = happyDayCheckbox())
         },
         onLongPress = {},
         onSelected = onSelected
