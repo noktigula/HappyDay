@@ -22,4 +22,6 @@
     <string name="vibrate_selector_title">Вибрация</string>
     <string name="snooze_alarm">Перенос</string>
     <string name="stop_alarm">Отмена</string>
+    <string name="button_delete">Удалить</string>
+    <string name="button_cancel_delete">Отмена</string>
 </resources>

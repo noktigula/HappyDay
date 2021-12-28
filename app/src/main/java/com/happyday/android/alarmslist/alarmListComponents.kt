@@ -2,15 +2,18 @@ package com.happyday.android.compose
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -21,20 +24,44 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.LinearGradient
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.happyday.android.R
 import com.happyday.android.commonui.Background
 import com.happyday.android.commonui.GradientButton
 import com.happyday.android.commonui.Screen
-import com.happyday.android.repository.AlarmModel
-import com.happyday.android.repository.AllAlarms
-import com.happyday.android.repository.Weekday
+import com.happyday.android.repository.*
 import com.happyday.android.ui.theme.*
+import com.happyday.android.utils.loge
 import com.happyday.android.utils.readableTime
 import com.happyday.android.viewmodel.AlarmUi
+import com.happyday.android.viewmodel.AlarmsViewModel
 
 @Composable
-fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlarm:()->Unit, onAlarmSelected:(AlarmUi)->Unit) {
+fun ListContent(
+    activity: AppCompatActivity,
+    onAddAlarm:()->Unit,
+    onDelete:(List<AlarmUi>)->Unit,
+    onAlarmClicked: (AlarmUi)->Unit,
+) {
+    val (selectedItems, setSelectedItems) = remember { mutableStateOf(listOf<AlarmUi>()) }
+
+    val selectedState = selectedItems.isNotEmpty()
+    val viewModel  = viewModel(
+        modelClass = AlarmsViewModel::class.java,
+        viewModelStoreOwner = activity,
+        key = "alarmsVM",
+        factory = object:ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return AlarmsViewModel(activity.application, Repo(AlarmsDb.get(activity.applicationContext))) as T
+        }
+    })
+
+    val listState = viewModel.listState.observeAsState()
     HappyDayTheme {
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
@@ -43,19 +70,40 @@ fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlar
                     AlarmsList(
                         modifier = Modifier.fillMaxSize(),
                         context = activity,
-                        data = allAlarms,
-                        onAlarmSelected = onAlarmSelected
+                        data = listState.value?.alarms ?: emptyList(),
+                        onAlarmSelected = { item ->
+                            if (selectedState) {
+                                val newItems = selectedItems.toMutableList().apply {
+                                    if (!remove(item)) {
+                                        add(item)
+                                    }
+                                }
+                                setSelectedItems(newItems)
+                            } else {
+                                onAlarmClicked(item)
+                            }
+                        },
+                        onLongPress = { item ->
+                            setSelectedItems(selectedItems.toMutableList().apply { add(item) })
+                        },
+                        deleteState = selectedState,
+                        selectedItems = selectedItems
                     )
 
-                    GradientButton(
-                        extraModifiers = {
-                            align(Alignment.BottomCenter)
-                            .background(Color.Transparent)
-                            .padding(bottom = Spacing.Small.size)
-                        },
-                        onClick = onAddAlarm
-                    ) {
-                        Text("     +     ", color = Color.White)
+                    if (!selectedState) {
+                        BottomButton(title = "     +     ") {
+                            onAddAlarm()
+                        }
+                    } else {
+                        DeleteBottomButtons(
+                            onCancel = {
+                               setSelectedItems(listOf())
+                            },
+                            onDelete = {
+                                setSelectedItems(listOf())
+                                onDelete(selectedItems)
+                            }
+                        )
                     }
                 }
             }
@@ -63,30 +111,128 @@ fun ListContent(activity: AppCompatActivity, allAlarms: List<AlarmUi>, onAddAlar
     }
 }
 
+
 @Composable
-fun AlarmsList(modifier: Modifier, context: Context, data: List<AlarmUi>, onAlarmSelected: (AlarmUi) -> Unit) {
+fun BoxScope.BottomButton(title: String, onPress: () -> Unit) {
+    GradientButton(
+        extraModifiers = {
+            align(Alignment.BottomCenter)
+                .background(Color.Transparent)
+                .padding(bottom = Spacing.Small.size)
+        },
+        onClick = onPress
+    ) {
+        Text(title, color = Color.White)
+    }
+}
+
+@Composable
+fun BoxScope.DeleteBottomButtons(onCancel:()->Unit, onDelete:()->Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        GradientButton(onClick = onCancel) {
+            Text(stringResource(id = R.string.button_cancel_delete), color = Color.White)
+        }
+
+        GradientButton(onClick = onDelete) {
+            Text(stringResource(id = R.string.button_delete), color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun AlarmsList(
+    modifier: Modifier,
+    context: Context,
+    data: List<AlarmUi>,
+    onAlarmSelected: (AlarmUi) -> Unit,
+    onLongPress: (AlarmUi)->Unit,
+    deleteState: Boolean,
+    selectedItems: List<AlarmUi>
+) {
     LazyColumn(modifier = modifier) {
         item {
             Header()
             Spacer(modifier = Modifier.height(Spacing.Small.size))
         }
         items(data) { item ->
-            AlarmRow(context, item.model) {
-                onAlarmSelected(item)
+            if (deleteState) {
+                DeletableAlarmRow(
+                    context = context,
+                    selected = selectedItems.contains(item),
+                    item = item.model,
+                    onSelected = {
+                        onAlarmSelected(item)
+                    }
+                )
+            } else {
+                AlarmRow(
+                    context = context,
+                    item = item.model,
+                    onLongPress = {
+                        onLongPress(item)
+                    },
+                    onSelected = {
+                        onAlarmSelected(item)
+                    }
+                )
             }
+
             Spacer(modifier = Modifier.height(Padding.BetweenCards.size))
         }
     }
 }
 
 @Composable
-fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
+fun DeletableAlarmRow(context: Context, selected: Boolean, item: AlarmModel, onSelected: ()->Unit) {
+    BaseAlarmRow(
+        context = context,
+        item = item,
+        boxComposable = {
+            Checkbox(checked = selected, onCheckedChange = { onSelected() })
+        },
+        onLongPress = {},
+        onSelected = onSelected
+    )
+}
+
+@Composable
+fun AlarmRow(context: Context, item: AlarmModel, onLongPress: () -> Unit, onSelected: ()->Unit) {
+   BaseAlarmRow(
+       context = context,
+       item = item,
+       boxComposable = {
+            Switch(
+                checked = item.enabled, onCheckedChange = {checked -> /*TODO*/},
+                colors = happyDaySwitch()
+            )
+       },
+       onLongPress = onLongPress,
+       onSelected = onSelected
+   )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun BaseAlarmRow(context: Context, item: AlarmModel, boxComposable: @Composable ()->Unit, onLongPress: () -> Unit, onSelected: () -> Unit) {
     val shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size)
     Card(
         modifier = Modifier
             .padding(horizontal = Spacing.Medium.size)
-            .clickable { onSelected() }
-            .background(Color.White, shape),
+            .background(Color.White, shape)
+            .combinedClickable(enabled = true,
+                onClick = {
+                    onSelected()
+                },
+                onLongClick = {
+                    onLongPress()
+                }
+            ),
         elevation = Elevation,
         shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size),
     ) {
@@ -103,10 +249,8 @@ fun AlarmRow(context: Context, item: AlarmModel, onSelected: ()->Unit) {
                 Text(text = item.title)
                 WeekdaysSelector(selectedWeekdays = item.alarms.keys)
             }
-            Switch(
-                checked = item.enabled, onCheckedChange = {checked -> /*TODO*/},
-                colors = happyDaySwitch()
-            )
+
+            boxComposable()
         }
     }
 }

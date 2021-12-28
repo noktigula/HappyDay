@@ -20,14 +20,13 @@ import java.util.*
 
 class AlarmsViewModel(app: Application, val repository: Repository) : AndroidViewModel(app) {
     private val _alarms: MutableLiveData<List<AlarmUi>> = MutableLiveData()
-    val alarms: LiveData<List<AlarmUi>> = _alarms
 
     private val _overlayPermission = MutableLiveData<Boolean>().apply {
         value = if (isM()) Settings.canDrawOverlays(app) else true
     }
 
     val listState = MediatorLiveData<ListState>().apply {
-        addSource(alarms) {
+        addSource(_alarms) {
             value = value?.copy(alarms = it)
         }
         addSource(_overlayPermission) {
@@ -87,9 +86,6 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
             repository.insert(alarm)
         }
         planner.scheduleAlarm(alarm)
-        loge("After addAlarm, alarms=${_alarms} value=${_alarms.value}")
-        //TODO move scheduling here as well?
-        //TODO add save on disk
     }
 
     fun addOrUpdate(alarm: AlarmModel, selectedId: String?=null) {
@@ -108,6 +104,14 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
         }
     }
 
+    fun deleteAlarms(alarms:List<AlarmUi>) {
+        viewModelScope.launch {
+            alarms.forEach {
+                repository.delete(it.model)
+            }
+        }
+    }
+
     private fun soundTitle(soundUri: Uri?) : String {
         val context = getApplication<Application>()
         return if (soundUri == null || soundUri == RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)) {
@@ -116,8 +120,7 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
             RingtoneManager.getRingtone(context, soundUri).getTitle(context)
         }
     }
-
 }
 
 data class ListState(val alarms: List<AlarmUi> = emptyList(), val overlayPermission: Boolean = false)
-data class AlarmUi(val model: AlarmModel, val soundTitle: (Uri?)->String)
+data class AlarmUi(val model: AlarmModel, val soundTitle: (Uri?)->String/*, val selected:Boolean = false*/)

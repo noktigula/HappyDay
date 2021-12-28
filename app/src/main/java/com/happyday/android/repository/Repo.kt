@@ -28,7 +28,9 @@ class Repo(
     }
 
     override suspend fun delete(alarm: AlarmModel) {
-        TODO("Not yet implemented")
+        withContext(dispatcher) {
+            db.alarmsDao().delete(alarm)
+        }
     }
 
     override suspend fun update(alarm: AlarmModel) {

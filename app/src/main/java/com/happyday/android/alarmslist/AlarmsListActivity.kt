@@ -11,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import com.google.android.material.timepicker.MaterialTimePicker
 import com.happyday.android.compose.AlarmEditForm
 import com.happyday.android.compose.ListContent
 import com.happyday.android.repository.*
@@ -19,7 +18,6 @@ import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
 import java.util.*
-import com.happyday.android.R
 import com.happyday.android.utils.isM
 import com.happyday.android.utils.requestOverlayPermission
 import com.happyday.android.viewmodel.AlarmUi
@@ -45,27 +43,29 @@ class AlarmsListActivity : AppCompatActivity() {
                         requestOverlayPermission()
                     }
                 }
-                alarmsList(alarms = state.alarms)
+                alarmsList()
             }
         }
     }
 
     @Composable
-    private fun alarmsList(alarms: List<AlarmUi>) {
+    private fun alarmsList() {
         @Suppress("ACTUAL_FUNCTION_WITH_DEFAULT_ARGUMENTS")
         val navController = rememberNavController()
         NavHost(navController = navController, startDestination = "list" ) {
             composable("list") {
                 ListContent(
                     activity = this@AlarmsListActivity,
-                    allAlarms = alarms,
                     onAddAlarm = {
-                        loge("onAddAlarm called!")
                         navController.navigate("edit")
-                    }
-                ) { alarm ->
-                    navController.navigate("edit?alarmId=${alarm.model.id}")
-                }
+                    },
+                    onDelete = { itemsToDelete ->
+                        viewModel.deleteAlarms(itemsToDelete)
+                    },
+                    onAlarmClicked = { alarm ->
+                        navController.navigate("edit?alarmId=${alarm.model.id}")
+                    },
+                )
             }
             composable("edit?alarmId={alarmId}",
                 arguments = listOf(navArgument("alarmId") {
@@ -81,8 +81,6 @@ class AlarmsListActivity : AppCompatActivity() {
                         } else null
                     ) ?: viewModel.newAlarm(),
                     onSave = { alarmModel ->
-                        //TODO update exitisting or insert new if needed
-                        loge("onSave! hashCode=${alarmModel.hashCode()} $alarmModel")
                         viewModel.addOrUpdate(alarmModel, alarmId)
                         navController.popBackStack()
                     },
