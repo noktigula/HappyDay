@@ -133,7 +133,8 @@ fun BoxScope.DeleteBottomButtons(onCancel:()->Unit, onDelete:()->Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .align(Alignment.BottomCenter),
+            .align(Alignment.BottomCenter)
+            .padding(Spacing.Small.size),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
