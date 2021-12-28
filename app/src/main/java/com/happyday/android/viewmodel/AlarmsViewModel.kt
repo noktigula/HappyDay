@@ -90,25 +90,35 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
 
     fun addOrUpdate(alarm: AlarmModel, selectedId: String?=null) {
         viewModelScope.launch {
-            val oldAlarm = if (selectedId == null) null else _alarms.value?.find { it.model.id == UUID.fromString(selectedId)}?.model
-            if (oldAlarm != null) {
-                //TODO find previous alarm so planner can cancel all running tasks
-                loge("Modifying old alarm!")
-                planner.updateAlarm(oldAlarm, alarm)
-                repository.update(alarm)
-            } else {
-                loge("Adding new alarm!")
-                planner.scheduleAlarm(alarm)
-                repository.insert(alarm)
+            if (!updateAlarm(alarm, selectedId)) {
+                addAlarm(alarm)
             }
         }
+    }
+
+    private suspend fun updateAlarm(newAlarm: AlarmModel, selectedId: String?=null) : Boolean {
+        val oldAlarm = (if (selectedId == null) null else _alarms.value?.find { it.model.id == UUID.fromString(selectedId)}?.model)
+            ?: return false
+
+        planner.updateAlarm(oldAlarm, newAlarm)
+        repository.update(newAlarm)
+        return true
     }
 
     fun deleteAlarms(alarms:List<AlarmUi>) {
         viewModelScope.launch {
             alarms.forEach {
                 repository.delete(it.model)
+                planner.cancel(it.model)
             }
+        }
+    }
+
+    fun updateAlarmEnabled(alarm: AlarmUi, enabled:Boolean) {
+        val newModel = alarm.model.copy(enabled = enabled)
+
+        viewModelScope.launch {
+            updateAlarm(newModel, newModel.id.toString())
         }
     }
 

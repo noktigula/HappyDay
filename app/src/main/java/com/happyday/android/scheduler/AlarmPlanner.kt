@@ -15,7 +15,9 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
 
     fun updateAlarm(oldAlarm: AlarmModel, newAlarm: AlarmModel) {
         cancel(oldAlarm)
-        scheduleAlarm(newAlarm)
+        if (newAlarm.enabled) {
+            scheduleAlarm(newAlarm)
+        }
     }
 
     fun cancel(alarm: AlarmModel) {

@@ -47,6 +47,7 @@ fun ListContent(
     onAddAlarm:()->Unit,
     onDelete:(List<AlarmUi>)->Unit,
     onAlarmClicked: (AlarmUi)->Unit,
+    onAlarmEnabledChange: (AlarmUi, Boolean)->Unit
 ) {
     val (selectedItems, setSelectedItems) = remember { mutableStateOf(listOf<AlarmUi>()) }
 
@@ -86,6 +87,7 @@ fun ListContent(
                         onLongPress = { item ->
                             setSelectedItems(selectedItems.toMutableList().apply { add(item) })
                         },
+                        onEnableChanged = onAlarmEnabledChange,
                         deleteState = selectedState,
                         selectedItems = selectedItems
                     )
@@ -152,6 +154,7 @@ fun AlarmsList(
     data: List<AlarmUi>,
     onAlarmSelected: (AlarmUi) -> Unit,
     onLongPress: (AlarmUi)->Unit,
+    onEnableChanged: (AlarmUi, Boolean) -> Unit,
     deleteState: Boolean,
     selectedItems: List<AlarmUi>
 ) {
@@ -179,6 +182,9 @@ fun AlarmsList(
                     },
                     onSelected = {
                         onAlarmSelected(item)
+                    },
+                    onEnableChanged = { enabled ->
+                        onEnableChanged(item, enabled)
                     }
                 )
             }
@@ -202,13 +208,13 @@ fun DeletableAlarmRow(context: Context, selected: Boolean, item: AlarmModel, onS
 }
 
 @Composable
-fun AlarmRow(context: Context, item: AlarmModel, onLongPress: () -> Unit, onSelected: ()->Unit) {
+fun AlarmRow(context: Context, item: AlarmModel, onLongPress: () -> Unit, onSelected: ()->Unit, onEnableChanged: (Boolean)->Unit) {
    BaseAlarmRow(
        context = context,
        item = item,
        boxComposable = {
             Switch(
-                checked = item.enabled, onCheckedChange = {checked -> /*TODO*/},
+                checked = item.enabled, onCheckedChange = onEnableChanged,
                 colors = happyDaySwitch()
             )
        },

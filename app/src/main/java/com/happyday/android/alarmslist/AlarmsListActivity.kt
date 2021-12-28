@@ -65,6 +65,7 @@ class AlarmsListActivity : AppCompatActivity() {
                     onAlarmClicked = { alarm ->
                         navController.navigate("edit?alarmId=${alarm.model.id}")
                     },
+                    onAlarmEnabledChange = viewModel::updateAlarmEnabled
                 )
             }
             composable("edit?alarmId={alarmId}",
