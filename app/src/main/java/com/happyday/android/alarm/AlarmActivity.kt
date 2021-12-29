@@ -1,7 +1,5 @@
-package com.happyday.android
+package com.happyday.android.alarm
 
-import android.content.Context
-import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.*
 import android.view.WindowManager
@@ -9,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,10 +24,10 @@ import com.happyday.android.repository.SingleAlarm
 import com.happyday.android.scheduler.AlarmManagerAlarmScheduler
 import com.happyday.android.scheduler.AlarmPlanner
 import com.happyday.android.utils.HDVibrator
-import com.happyday.android.utils.isS
 import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
+import com.happyday.android.R
 
 private typealias RingtoneStop = ()->Unit
 private typealias VibrateStop = ()->Unit
