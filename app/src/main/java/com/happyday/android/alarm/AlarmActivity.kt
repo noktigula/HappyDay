@@ -60,7 +60,9 @@ class AlarmActivity: ComponentActivity() {
             val musicStop = playMusic(parent.model)
             val vibratorStop = vibrate(parent.model)
 
-            setUi(currentAlarm!!) {
+            val affirmation = Affirmations(SharedPrefsPersistor(this), listOf()).getNext()
+
+            setUi(affirmation, currentAlarm!!) {
                 musicStop()
                 vibratorStop()
             }
@@ -98,10 +100,10 @@ class AlarmActivity: ComponentActivity() {
         }
     }
 
-    private fun setUi(alarm: SingleAlarm, turnOff:()->Unit) {
+    private fun setUi(affirmation: Affirmation, alarm: SingleAlarm, turnOff:()->Unit) {
         setContent {
             alarmUi(
-                alarm = alarm,
+                affirmation = affirmation,
                 onSnooze = {
                     planner.snoozeAlarm(alarm)
                     turnOff()
@@ -116,7 +118,7 @@ class AlarmActivity: ComponentActivity() {
     }
 
     @Composable
-    fun alarmUi(alarm:SingleAlarm?, onSnooze: ()->Unit, onStop:()->Unit) {
+    fun alarmUi(affirmation:Affirmation, onSnooze: ()->Unit, onStop:()->Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,8 +127,8 @@ class AlarmActivity: ComponentActivity() {
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(painterResource(id = R.drawable.image_0), "Motivation picture")
-            Text(stringResource(id = R.string.motivatin_0))
+            Image(painterResource(id = affirmation.img), "Affirmation picture")
+            Text(stringResource(id = affirmation.text))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -146,6 +148,6 @@ class AlarmActivity: ComponentActivity() {
     @Preview
     @Composable
     fun preview() {
-        alarmUi(alarm = null, onSnooze = {}, onStop = {})
+        alarmUi(affirmation = Affirmation(0, R.drawable.image_0, R.string.motivatin_0), onSnooze = {}, onStop = {})
     }
 }
