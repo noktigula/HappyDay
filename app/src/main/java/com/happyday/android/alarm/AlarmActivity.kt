@@ -45,6 +45,8 @@ class AlarmActivity: ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestAppearOnTop()
 
+        loge("Alarm activity started")
+
         // TODO what to do if null?
         //  create new Alarm for snoozing with default sound and with current hour and minute
         viewModel.byMinute.observe(this) { alarmsByMinute ->
@@ -60,7 +62,8 @@ class AlarmActivity: ComponentActivity() {
             val musicStop = playMusic(parent.model)
             val vibratorStop = vibrate(parent.model)
 
-            val affirmation = Affirmations(SharedPrefsPersistor(this), listOf()).getNext()
+            val affirmation = Affirmations(SharedPrefsPersistor(this), affirmationProvider().getAffirmations()).getNext()
+            loge("Loaded affirmation: $affirmation")
 
             setUi(affirmation, currentAlarm!!) {
                 musicStop()
@@ -148,6 +151,6 @@ class AlarmActivity: ComponentActivity() {
     @Preview
     @Composable
     fun preview() {
-        alarmUi(affirmation = Affirmation(0, R.drawable.image_0, R.string.motivatin_0), onSnooze = {}, onStop = {})
+        alarmUi(affirmation = Affirmation(0, R.drawable.img_0, R.string.affirmation_0), onSnooze = {}, onStop = {})
     }
 }

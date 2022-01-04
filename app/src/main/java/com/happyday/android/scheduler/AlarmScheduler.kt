@@ -4,7 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import com.happyday.android.AlarmActivity
+import com.happyday.android.alarm.AlarmActivity
 
 interface AlarmScheduler {
     fun schedule(whenMillis: Long, requestCode: Int)

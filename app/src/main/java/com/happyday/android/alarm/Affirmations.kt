@@ -2,6 +2,7 @@ package com.happyday.android.alarm
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import com.happyday.android.utils.loge
 
 data class Affirmation(val id: Int, @DrawableRes val img: Int, @StringRes val text: Int)
 data class LastUsedIndex(val index: Int, val date: Long)
@@ -15,10 +16,13 @@ class Affirmations(
         //  - list of affirmations must be ordered to keep same order between sessions
 
         val lastUsedIndex = persistor.loadIndex()
+        loge("Last used index: $lastUsedIndex")
         if (lastUsedIndex.isToday()) {
+            loge("Last used index = today!")
             return affirmations[lastUsedIndex.index]
         }
 
+        loge("Last used index not found, storing...")
         val today = System.currentTimeMillis()
         val nextIndex = getAdjustedIndex(persistor.loadIndex().index, affirmations.size)
         val todayAffirmation = affirmations[ nextIndex ]

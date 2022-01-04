@@ -27,7 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AlarmActivity"
+        <activity android:name=".alarm.AlarmActivity"
             android:showOnLockScreen="true"
             android:noHistory="true"
             android:launchMode="singleTop"
