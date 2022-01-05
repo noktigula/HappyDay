@@ -37,6 +37,7 @@ import com.happyday.android.repository.Weekday
 import com.happyday.android.ui.theme.*
 import com.happyday.android.utils.*
 import com.happyday.android.viewmodel.AlarmUi
+import java.lang.RuntimeException
 import java.util.*
 
 fun createMutableModel(alarm: AlarmModel?, hour: Int, minute: Int) =
@@ -67,11 +68,34 @@ fun EditFormPreview() {
 
 @Composable
 fun AlarmEditForm(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
+    HappyDayTheme {
+        Surface(color = MaterialTheme.colors.background) {
+            Screen(extraModifiers = {
+                padding(horizontal = Spacing.Medium.size)
+            }) {
+                AlarmEditFormContent(alarm, onSave, onCancel)
+            }
+        }
+    }
+}
+
+//object ModelHolder {
+//    var model: MutableModel? = null
+//}
+
+private data class Time(val hour: Int, val minute: Int)
+
+@Composable
+fun AlarmEditFormContent(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> Unit) {
     val (hour, minute) = alarmTimeOrNow(alarm.model)
 
     val (mutableModel, setModel) = remember {
         mutableStateOf(createMutableModel(alarm.model, hour, minute))
     }
+
+    val (time, setTime) = remember { mutableStateOf(Time(hour, minute)) }
+
+//    ModelHolder.model = mutableModel
 
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
         val data = activityResult.data
@@ -81,41 +105,30 @@ fun AlarmEditForm(alarm: AlarmUi, onSave: (AlarmModel) -> Unit, onCancel: () -> 
     }
 
     val ringtonePickerTitle = stringResource(id = R.string.alarm_picker_title)
-
-    HappyDayTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            Screen(extraModifiers = {
-                padding(horizontal = Spacing.Medium.size)
-            }) {
-                CancelSaveRow(onCancel=onCancel, onSave={
-                    loge("onSave, model=${mutableModel.hashCode()}")
-                    onSave(mutableModel.toAlarm())
-                })
-                HDTimePicker(hour, minute) { hour, minute ->
-                    setModel(mutableModel.copy(hour = hour, minute = minute))
-                }
-                DaysSelector(mutableModel.alarms) { selectedDay ->
-                    val copy = mutableModel.copy(alarms = mutableModel.alarms.toMutableSet().apply {
-                        if (!add(selectedDay)) {
-                            remove(selectedDay)
-                        }
-                    })
-                    loge("DaysSelector: $copy")
-                    setModel(copy)
-                }
-
-                VerticalSpacing()
-
-                MelodySelector(title =alarm.soundTitle(mutableModel.sound)) {
-                    launcher.launch(ringtonePickerIntent(ringtonePickerTitle, mutableModel.sound))
-                }
-
-                VerticalSpacing()
-
-                VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
-            }
-        }
+    CancelSaveRow(onCancel=onCancel, onSave={
+        onSave(mutableModel.copy(hour = time.hour, minute = time.minute).toAlarm())
+    })
+    HDTimePicker(mutableModel) { newHour, newMinute ->
+        setTime(Time(newHour, newMinute))
     }
+    DaysSelector(mutableModel) { selectedDay ->
+        val copy = mutableModel.copy(alarms = mutableModel.alarms.toMutableSet().apply {
+            if (!add(selectedDay)) {
+                remove(selectedDay)
+            }
+        })
+        setModel(copy)
+    }
+
+    VerticalSpacing()
+
+    MelodySelector(title =alarm.soundTitle(mutableModel.sound)) {
+        launcher.launch(ringtonePickerIntent(ringtonePickerTitle, mutableModel.sound))
+    }
+
+    VerticalSpacing()
+
+    VibrateSelector(checked = mutableModel.vibrate) { setModel(mutableModel.copy(vibrate = it)) }
 }
 
 @Composable
@@ -138,14 +151,14 @@ fun CancelSaveRow(onCancel: ()->Unit, onSave: ()->Unit) {
 }
 
 @Composable
-fun HDTimePicker(hour: Int, minute: Int, onChanged: (Int, Int)->Unit) {
+fun HDTimePicker(model: MutableModel, onChanged: (Int, Int)->Unit) {
     AndroidView(
         modifier = Modifier.fillMaxWidth(),
         factory = { context ->
             val view = LayoutInflater.from(context).inflate(R.layout.time_picker, null)
             val timePicker = view.findViewById<TimePicker>(R.id.time_picker).apply {
                 setIs24HourView(true)
-                setTime(hour, minute)
+                setTime(model.hour, model.minute)
                 setOnTimeChangedListener { _, hour, minute ->
                     onChanged(hour, minute)
                 }
@@ -154,44 +167,19 @@ fun HDTimePicker(hour: Int, minute: Int, onChanged: (Int, Int)->Unit) {
             timePicker
         }
     )
-//    Row(
-//        horizontalArrangement = Arrangement.SpaceEvenly,
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .background(Color.White)
-//            .padding(12.dp)
-//            .clip(RoundedCornerShape(25.dp))
-//    ) {
-//        TimeScroller(23)
-//        Text(":")
-//        TimeScroller(59)
-//    }
-}
-
-@Composable
-fun TimeScroller(max: Int) {
-//    LazyColumn(modifier = Modifier
-//        .weight()
-//    ) {
-//        items(max) { item ->
-//            Text(text = item.toString())
-//        }
-//    }
-
 }
 
 /**
  * @param selected if day is present in set - it's selected
  */
 @Composable
-fun DaysSelector(selected: Set<Weekday>, onSelected: (Weekday)->Unit) {
+fun DaysSelector(model: MutableModel, onSelected: (Weekday)->Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Weekday.weekdays().forEach { day -> Day(title = stringResource(id = dayTitle(day)), selected = selected.contains(day)) {
+        Weekday.weekdays().forEach { day -> Day(title = stringResource(id = dayTitle(day)), selected = model.alarms.contains(day)) {
             onSelected(day)
         }}
     }
