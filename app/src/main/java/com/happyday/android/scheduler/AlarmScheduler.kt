@@ -37,6 +37,6 @@ class AlarmManagerAlarmScheduler(val context: Context) : AlarmScheduler {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra("alarm_id", requestCode)
         },
-        PendingIntent.FLAG_UPDATE_CURRENT
+        flag
     )
 }
