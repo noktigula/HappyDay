@@ -73,7 +73,7 @@ fun alarmTimeOrNow(alarmModel: AlarmModel?) : Pair<Int, Int> {
 fun Calendar.minute() = get(Calendar.MINUTE)
 fun Calendar.hour() = get(Calendar.HOUR_OF_DAY)
 fun Calendar.day() = get(Calendar.DAY_OF_WEEK)
-fun Calendar.isToday(hour: Int, minute: Int) = this.hour() >= hour && this.minute() > minute
+fun Calendar.timeWillHappenToday(hour: Int, minute: Int) = hour >= this.hour() && minute > this.minute()
 
 fun TimePicker.setTime(hour: Int, minute: Int) {
     if (isM()) {

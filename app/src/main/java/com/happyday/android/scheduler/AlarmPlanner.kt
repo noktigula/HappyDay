@@ -51,7 +51,7 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
             singleAlarm.day.value
         } else {
             val now = Calendar.getInstance()
-            if (now.isToday(singleAlarm.hour, singleAlarm.minute)) {
+            if (now.timeWillHappenToday(singleAlarm.hour, singleAlarm.minute)) {
                 now.day()
             } else {
                 now.add(Calendar.DAY_OF_MONTH, 1)
