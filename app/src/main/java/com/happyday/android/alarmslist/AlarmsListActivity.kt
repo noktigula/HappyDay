@@ -36,15 +36,6 @@ class AlarmsListActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance(Locale.GERMANY)
         loge("Today is ${calendar.get(Calendar.DAY_OF_WEEK)}")
 
-//        setContentView(TextView(this).apply {
-//            text = "press me"
-//            setOnClickListener {
-//                if (isM()) {
-//                    requestOverlayPermission()
-//                }
-//            }
-//        })
-
         viewModel.byMinute.observe(this) { _ -> /*Intentionally do nothing - just need to trigger Transformations*/ }
         viewModel.listState.observe(this) { state ->
 
