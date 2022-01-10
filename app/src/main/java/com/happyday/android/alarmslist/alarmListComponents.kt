@@ -89,7 +89,7 @@ fun ListContent(
                         },
                         onEnableChanged = onAlarmEnabledChange,
                         deleteState = selectedState,
-                        selectedItems = selectedItems
+                        selectedItems = selectedItems,
                     )
 
                     if (!selectedState) {
@@ -157,7 +157,7 @@ fun AlarmsList(
     onLongPress: (AlarmUi)->Unit,
     onEnableChanged: (AlarmUi, Boolean) -> Unit,
     deleteState: Boolean,
-    selectedItems: List<AlarmUi>
+    selectedItems: List<AlarmUi>,
 ) {
     LazyColumn(modifier = modifier) {
         item {
@@ -172,7 +172,8 @@ fun AlarmsList(
                     item = item.model,
                     onSelected = {
                         onAlarmSelected(item)
-                    }
+                    },
+                    nameResolver = { item.weekdayName(it) }
                 )
             } else {
                 AlarmRow(
@@ -186,7 +187,8 @@ fun AlarmsList(
                     },
                     onEnableChanged = { enabled ->
                         onEnableChanged(item, enabled)
-                    }
+                    },
+                    nameResolver = { item.weekdayName(it) }
                 )
             }
 
@@ -196,7 +198,13 @@ fun AlarmsList(
 }
 
 @Composable
-fun DeletableAlarmRow(context: Context, selected: Boolean, item: AlarmModel, onSelected: ()->Unit) {
+fun DeletableAlarmRow(
+    context: Context,
+    selected: Boolean,
+    item: AlarmModel,
+    onSelected: ()->Unit,
+    nameResolver: (Weekday) -> String
+) {
     BaseAlarmRow(
         context = context,
         item = item,
@@ -204,12 +212,20 @@ fun DeletableAlarmRow(context: Context, selected: Boolean, item: AlarmModel, onS
             Checkbox(checked = selected, onCheckedChange = { onSelected() }, colors = happyDayCheckbox())
         },
         onLongPress = {},
-        onSelected = onSelected
+        onSelected = onSelected,
+        nameResolver = nameResolver
     )
 }
 
 @Composable
-fun AlarmRow(context: Context, item: AlarmModel, onLongPress: () -> Unit, onSelected: ()->Unit, onEnableChanged: (Boolean)->Unit) {
+fun AlarmRow(
+    context: Context,
+    item: AlarmModel,
+    onLongPress: () -> Unit,
+    onSelected: ()->Unit,
+    onEnableChanged: (Boolean)->Unit,
+    nameResolver: (Weekday) -> String
+) {
    BaseAlarmRow(
        context = context,
        item = item,
@@ -220,13 +236,20 @@ fun AlarmRow(context: Context, item: AlarmModel, onLongPress: () -> Unit, onSele
             )
        },
        onLongPress = onLongPress,
-       onSelected = onSelected
+       onSelected = onSelected,
+       nameResolver = nameResolver
    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BaseAlarmRow(context: Context, item: AlarmModel, boxComposable: @Composable ()->Unit, onLongPress: () -> Unit, onSelected: () -> Unit) {
+fun BaseAlarmRow(
+    context: Context, item: AlarmModel,
+    boxComposable: @Composable ()->Unit,
+    onLongPress: () -> Unit,
+    onSelected: () -> Unit,
+    nameResolver: (Weekday) -> String
+) {
     val shape = RoundedCornerShape(size = RoundCorners.AlarmCard.size)
     Card(
         modifier = Modifier
@@ -254,7 +277,7 @@ fun BaseAlarmRow(context: Context, item: AlarmModel, boxComposable: @Composable 
             Text(text = item.readableTime(context), style=MaterialTheme.typography.h1)
             Column (horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = item.title)
-                WeekdaysSelector(selectedWeekdays = item.alarms.keys)
+                WeekdaysSelector(selectedWeekdays = item.alarms.keys, nameResolver)
             }
 
             boxComposable()
@@ -263,11 +286,11 @@ fun BaseAlarmRow(context: Context, item: AlarmModel, boxComposable: @Composable 
 }
 
 @Composable
-fun WeekdaysSelector(selectedWeekdays: Set<Weekday>) {
+fun WeekdaysSelector(selectedWeekdays: Set<Weekday>, nameResolver: (Weekday)->String) {
     Row {
         Weekday.values().map {
             if (it in selectedWeekdays) {
-                WeekdayBox(it.name)
+                WeekdayBox(nameResolver(it))
                 Spacer(modifier = Modifier.padding(Padding.BetweenSelectedWeekdays.size))
             }
         }

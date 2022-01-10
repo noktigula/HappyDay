@@ -60,7 +60,8 @@ fun EditFormPreview() {
             minute = 24,
             alarms = mutableMapOf()
         ),
-        soundTitle = { "Default" }
+        soundTitle = { "Default" },
+        weekdayName = {it.name}
     ), onSave = { /*TODO*/ }) {
         //do nothing
     }

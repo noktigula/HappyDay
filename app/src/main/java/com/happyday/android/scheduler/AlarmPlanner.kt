@@ -8,9 +8,7 @@ import java.util.*
 
 class AlarmPlanner(private val scheduler: AlarmScheduler) {
     fun scheduleAlarm(alarm: AlarmModel) {
-//        loge("Can schedule alarms? ${alarmManager?.canScheduleExactAlarms()}")
         alarm.alarms.forEach { (_, singleAlarm) -> scheduleSingleAlarm(singleAlarm) }
-        loge("Scheduled!")
     }
 
     fun updateAlarm(oldAlarm: AlarmModel, newAlarm: AlarmModel) {
@@ -26,7 +24,6 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
 
     //TODO get snooze value from some config to simplify debug / release
     fun snoozeAlarm(alarm:SingleAlarm?) {
-        //making a new copy will override any other alarm scheduled at snoozed time
         //TODO check case when scheduled for last 10m of hour (i.e. it's 7.55, snoozed by 10m, will it become 8.05?)
         if (alarm == null) {
             loge("Alarm is null, can't snooze!")
@@ -36,14 +33,16 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
         //TODO - minute needs to be counted not from alarm but from current time!
         val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 10)
         scheduleSingleAlarm(snoozedAlarm)
-        loge("Snoozed! $snoozedAlarm")
     }
 
     fun scheduleNext(alarm: SingleAlarm) {
         if (alarm.isRepetetive()) {
-            loge("Scheduling next alarm")
             scheduleSingleAlarm(alarm)
         }
+    }
+
+    fun isToday(alarm: AlarmModel) : Boolean {
+        return Calendar.getInstance().timeWillHappenToday(alarm.hour, alarm.minute)
     }
 
     private fun selectWeekDay(singleAlarm: SingleAlarm) : Int {

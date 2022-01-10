@@ -24,4 +24,13 @@
     <string name="stop_alarm">Отмена</string>
     <string name="button_delete">Удалить</string>
     <string name="button_cancel_delete">Отмена</string>
+    <string name="weekday_today">Сегодня</string>
+    <string name="weekday_tomorrow">Завтра</string>
+    <string name="weekday_monday">Пн</string>
+    <string name="weekday_tuesday">Вт</string>
+    <string name="weekday_wendesday">Ср</string>
+    <string name="weekday_thursday">Чт</string>
+    <string name="weekday_friday">Пт</string>
+    <string name="weekday_saturday">Сб</string>
+    <string name="weekday_sunday">Вс</string>
 </resources>

@@ -40,7 +40,11 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
     init {
         viewModelScope.launch {
             repository.loadAlarms().collect { allAlarms ->
-                _alarms.value = allAlarms.map { AlarmUi(it, ::soundTitle)}
+                _alarms.value = allAlarms.map { alarm ->
+                    AlarmUi(alarm, ::soundTitle) { day ->
+                        weekdayName(alarm, day)
+                    }
+                }
             }
         }
     }
@@ -65,18 +69,22 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
 
     fun newAlarm() : AlarmUi {
         val (hour, minute) = nowHourMinute()
+        val model = AlarmModel(
+            id = UUID.randomUUID(),
+            title = "",
+            vibrate = true,
+            sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+            enabled = true,
+            hour = hour,
+            minute = minute,
+            alarms = mutableMapOf()
+        )
         return AlarmUi(
-            model = AlarmModel(
-                id = UUID.randomUUID(),
-                title = "",
-                vibrate = true,
-                sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                enabled = true,
-                hour = hour,
-                minute = minute,
-                alarms = mutableMapOf()
-            ),
-            soundTitle = ::soundTitle
+            model = model,
+            soundTitle = ::soundTitle,
+            weekdayName = {
+                weekdayName(model, it)
+            }
         )
     }
 
@@ -130,7 +138,26 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
             RingtoneManager.getRingtone(context, soundUri).getTitle(context)
         }
     }
+
+    private fun weekdayName(alarm: AlarmModel, weekday: Weekday) : String {
+        val context = getApplication<Application>()
+        return when(weekday) {
+            Weekday.None -> {
+
+                val strId = if (planner.isToday(alarm)) R.string.weekday_today else R.string.weekday_tomorrow
+                context.getString(strId)
+            }
+            Weekday.Mon -> context.getString(R.string.weekday_monday)
+            Weekday.Tue -> context.getString(R.string.weekday_tuesday)
+            Weekday.Wed -> context.getString(R.string.weekday_wendesday)
+            Weekday.Thu -> context.getString(R.string.weekday_thursday)
+            Weekday.Fri -> context.getString(R.string.weekday_friday)
+            Weekday.Sat -> context.getString(R.string.weekday_saturday)
+            Weekday.Sun -> context.getString(R.string.weekday_sunday)
+        }
+    }
 }
 
 data class ListState(val alarms: List<AlarmUi> = emptyList(), val overlayPermission: Boolean = false)
-data class AlarmUi(val model: AlarmModel, val soundTitle: (Uri?)->String/*, val selected:Boolean = false*/)
+//TODO ideally this should just contain already resolved fields, but for the sake of time let's do it dirty with refs to functions
+data class AlarmUi(val model: AlarmModel, val soundTitle: (Uri?)->String, val weekdayName: (weekday: Weekday)->String)
