@@ -34,7 +34,7 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
         }
 
         //TODO - minute needs to be counted not from alarm but from current time!
-        val snoozedAlarm = alarm.copy(minute = alarm.minute + 1)
+        val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 10)
         scheduleSingleAlarm(snoozedAlarm)
         loge("Snoozed! $snoozedAlarm")
     }
