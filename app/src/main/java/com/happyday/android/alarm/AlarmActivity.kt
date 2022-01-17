@@ -31,11 +31,39 @@ import com.happyday.android.utils.loge
 import com.happyday.android.utils.viewModelBuilder
 import com.happyday.android.viewmodel.AlarmsViewModel
 import com.happyday.android.R
+import com.happyday.android.viewmodel.AlarmUi
+import java.util.*
 
 private typealias RingtoneStop = ()->Unit
 private typealias VibrateStop = ()->Unit
+private typealias Command = ()->Unit
 
 class AlarmActivity: ComponentActivity() {
+    //whoever reads this - I'm sorry
+    private class TaskScheduler {
+        private var delayedCommand: Command? = null
+        private var canRunSecondary: Boolean = false
+
+        fun schedule(primary: Boolean, command: Command) {
+            if (primary) {
+                command()
+            } else {
+                if (!canRunSecondary) {
+                    delayedCommand = command
+                } else {
+                    command()
+                }
+            }
+        }
+
+        fun unlockSecondary() {
+            canRunSecondary = true
+            if (delayedCommand != null) {
+                delayedCommand?.invoke()
+            }
+        }
+    }
+
     private val viewModel: AlarmsViewModel by viewModelBuilder {
         AlarmsViewModel(application, Repo(AlarmsDb.get(application)))
     }
@@ -44,37 +72,60 @@ class AlarmActivity: ComponentActivity() {
         AlarmPlanner(AlarmManagerAlarmScheduler(applicationContext))
     }
 
+    private val scheduler = TaskScheduler()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestAppearOnTop()
 
         (application as HappyDayApp).wakeLock.release()
+        val alarmId = intent.extras?.getInt("alarm_id", 0) ?: 0
+        loge("AlarmId=${alarmId}")
 
-        // TODO what to do if null?
-        //  create new Alarm for snoozing with default sound and with current hour and minute
+        viewModel.listState.observe(this) {
+            val (snoozedAlarm, snoozedSingleAlarm) = viewModel.snoozedAlarm(alarmId)
+            if (snoozedAlarm != null && snoozedSingleAlarm != null) {
+                loge("Snoozed alarm found: ${snoozedAlarm} AND $snoozedSingleAlarm")
+                scheduler.schedule(primary = true) {
+                    handleAlarm(snoozedAlarm, snoozedSingleAlarm)
+                }
+            } else {
+                loge("Snoozed alarm not found :(")
+                scheduler.unlockSecondary()
+            }
+        }
+
+        //TODO I feel that this is terrible but I need to finish it ASAP
         viewModel.byMinute.observe(this) { alarmsByMinute ->
             /**
              * TODO schedule next day if repetetive
              * If day is null, then non-repetetive
              * If no days selected when creating alarm, schedules for the same day but next week
              */
-            val currentAlarm = alarmsByMinute[intent.extras?.getInt("alarm_id")]  // TODO handle null
-            loge("Found alarm: $currentAlarm")
-            val parent = viewModel.alarmById(currentAlarm?.parentId) ?: viewModel.newAlarm()
-
-            val musicStop = playMusic(parent.model)
-            val vibratorStop = vibrate(parent.model)
-
-            val affirmation = Affirmations(SharedPrefsPersistor(this), affirmationProvider().getAffirmations()).getNext()
-            loge("Loaded affirmation: $affirmation")
-
-            setUi(affirmation, currentAlarm!!) {
-                musicStop()
-                vibratorStop()
+            val currentAlarm = alarmsByMinute[alarmId]
+            if (currentAlarm != null) {
+                loge("Found alarm: $currentAlarm")
+                val parent = viewModel.alarmById(currentAlarm.parentId) ?: viewModel.newAlarm()
+                scheduler.schedule(false) {
+                    handleAlarm(parent, currentAlarm)
+                }
             }
-
-            planner.scheduleNext(currentAlarm)
         }
+    }
+
+    private fun handleAlarm(alarmModel: AlarmUi, singleAlarm: SingleAlarm) {
+        val musicStop = playMusic(alarmModel.model)
+        val vibratorStop = vibrate(alarmModel.model)
+
+        val affirmation = Affirmations(SharedPrefsPersistor(this), affirmationProvider().getAffirmations()).getNext()
+        loge("Loaded affirmation: $affirmation")
+
+        setUi(affirmation, singleAlarm) {
+            musicStop()
+            vibratorStop()
+        }
+
+        planner.scheduleNext(singleAlarm)
     }
 
     private fun playMusic(model: AlarmModel) : RingtoneStop {
@@ -113,7 +164,7 @@ class AlarmActivity: ComponentActivity() {
             alarmUi(
                 affirmation = affirmation,
                 onSnooze = {
-                    planner.snoozeAlarm(alarm)
+                    viewModel.snoozeAlarm(alarm)
                     turnOff()
                     finish()
                 },

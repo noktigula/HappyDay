@@ -22,17 +22,9 @@ class AlarmPlanner(private val scheduler: AlarmScheduler) {
         alarm.alarms.forEach { (_, singleAlarm) -> scheduler.cancel(singleAlarm.hashCode()) }
     }
 
-    //TODO get snooze value from some config to simplify debug / release
-    fun snoozeAlarm(alarm:SingleAlarm?) {
-        //TODO check case when scheduled for last 10m of hour (i.e. it's 7.55, snoozed by 10m, will it become 8.05?)
-        if (alarm == null) {
-            loge("Alarm is null, can't snooze!")
-            return
-        }
-
+    fun snoozeAlarm(alarm:SingleAlarm) {
         //TODO - minute needs to be counted not from alarm but from current time!
-        val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 10)
-        scheduleSingleAlarm(snoozedAlarm)
+        scheduleSingleAlarm(alarm)
     }
 
     fun scheduleNext(alarm: SingleAlarm) {

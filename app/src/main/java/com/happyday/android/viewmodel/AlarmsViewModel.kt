@@ -1,9 +1,11 @@
 package com.happyday.android.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.Settings
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.happyday.android.R
 import com.happyday.android.repository.*
@@ -65,6 +67,44 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
 
     fun alarmById(id: UUID?) : AlarmUi? {
         return _alarms.value?.find { it.model.id == id }
+    }
+
+    fun snoozeAlarm(alarm: SingleAlarm) {
+        val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 1)
+        sharedPrefs().edit()
+            .putInt(SnoozeContract.ORIGINAL_ID, alarm.hashCode())
+            .putInt(SnoozeContract.SNOOZE_ID, snoozedAlarm.hashCode())
+            .putString(SnoozeContract.PARENT_ID, alarm.parentId.toString())
+            .apply()
+
+        //FIXME support multiple alarms
+
+        loge("Snoozed alarm prefs: original_id=${alarm.hashCode()} alarm_id=${snoozedAlarm.hashCode()} parentId=${alarm.parentId}")
+
+        planner.snoozeAlarm(snoozedAlarm)
+    }
+
+    fun snoozedAlarm(currentAlarmId: Int) : Pair<AlarmUi?, SingleAlarm?> {
+        val prefs = sharedPrefs()
+        val parentId = prefs.getString(SnoozeContract.PARENT_ID, "")
+        val originalId = prefs.getInt(SnoozeContract.ORIGINAL_ID, 0)
+        val alarmId = prefs.getInt(SnoozeContract.SNOOZE_ID, 0)
+
+        loge("Snoozed alarm prefs: original_id=${originalId} alarm_id=${alarmId} parentId=${parentId}")
+
+        if (currentAlarmId != alarmId) {
+            loge("Not current alarm!")
+            return Pair(null, null)
+        }
+
+        return if (!parentId.isNullOrEmpty()) {
+            loge("Actually snooozed alarm, trying to restore")
+            val alarmUi = alarmById(UUID.fromString(parentId))
+            Pair(
+                alarmUi,
+                alarmUi?.model?.alarms?.values?.find { it.hashCode() == originalId }
+            )
+        } else Pair(null, null)
     }
 
     fun newAlarm() : AlarmUi {
@@ -156,6 +196,8 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
             Weekday.Sun -> context.getString(R.string.weekday_sunday)
         }
     }
+
+    private fun sharedPrefs() = getApplication<Application>().getSharedPreferences("snoozed_alarms", Context.MODE_PRIVATE)
 }
 
 data class ListState(val alarms: List<AlarmUi> = emptyList(), val overlayPermission: Boolean = false)

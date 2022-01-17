@@ -51,7 +51,7 @@ data class SingleAlarm(
      * Each minute in a week gets it's own id
      * In case of multiple alarms set for the same time, only last one will be executed
      */
-    override fun hashCode(): Int = day.ordinal * 2000 + hour + minute
+    override fun hashCode(): Int = day.ordinal * 2000 + hour*100 + minute
 
     override fun equals(other: Any?): Boolean {
         return if (other is SingleAlarm) {
