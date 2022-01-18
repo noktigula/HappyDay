@@ -70,8 +70,8 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
     }
 
     fun snoozeAlarm(alarm: SingleAlarm) {
-        val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 1)
-        sharedPrefs().edit()
+        val snoozedAlarm = alarm.copy(minute = nowHourMinute().second + 10)
+        sharedPrefs(snoozedAlarm.hashCode()).edit()
             .putInt(SnoozeContract.ORIGINAL_ID, alarm.hashCode())
             .putInt(SnoozeContract.SNOOZE_ID, snoozedAlarm.hashCode())
             .putString(SnoozeContract.PARENT_ID, alarm.parentId.toString())
@@ -85,7 +85,7 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
     }
 
     fun snoozedAlarm(currentAlarmId: Int) : Pair<AlarmUi?, SingleAlarm?> {
-        val prefs = sharedPrefs()
+        val prefs = sharedPrefs(currentAlarmId)
         val parentId = prefs.getString(SnoozeContract.PARENT_ID, "")
         val originalId = prefs.getInt(SnoozeContract.ORIGINAL_ID, 0)
         val alarmId = prefs.getInt(SnoozeContract.SNOOZE_ID, 0)
@@ -197,7 +197,7 @@ class AlarmsViewModel(app: Application, val repository: Repository) : AndroidVie
         }
     }
 
-    private fun sharedPrefs() = getApplication<Application>().getSharedPreferences("snoozed_alarms", Context.MODE_PRIVATE)
+    private fun sharedPrefs(alarmId: Int) = getApplication<Application>().getSharedPreferences("snoozed_alarms_$alarmId", Context.MODE_PRIVATE)
 }
 
 data class ListState(val alarms: List<AlarmUi> = emptyList(), val overlayPermission: Boolean = false)
