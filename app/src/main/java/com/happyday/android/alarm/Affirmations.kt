@@ -3,6 +3,7 @@ package com.happyday.android.alarm
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.happyday.android.utils.loge
+import java.util.*
 
 data class Affirmation(val id: Int, @DrawableRes val img: Int, @StringRes val text: Int)
 data class LastUsedIndex(val index: Int, val date: Long)
@@ -11,20 +12,23 @@ class Affirmations(
     private val persistor: AffirmationsPersistor,
     private val affirmations: List<Affirmation>
 ) {
-    fun getNext() : Affirmation {
+    /**
+     * @param indexChecker needed only for testing
+     */
+    fun getNext(indexChecker:(LastUsedIndex)->Boolean = { it.isToday() }) : Affirmation {
         // 1 day 1 affirmation
         //  - list of affirmations must be ordered to keep same order between sessions
 
         val lastUsedIndex = persistor.loadIndex()
         loge("Last used index: $lastUsedIndex")
-        if (lastUsedIndex.isToday()) {
+        if (indexChecker(lastUsedIndex)) {
             loge("Last used index = today!")
             return affirmations[lastUsedIndex.index]
         }
 
         loge("Last used index not found, storing...")
-        val today = System.currentTimeMillis()
-        val nextIndex = getAdjustedIndex(persistor.loadIndex().index, affirmations.size)
+        val today = Calendar.getInstance().timeInMillis
+        val nextIndex = getAdjustedIndex(lastUsedIndex.index, affirmations.size)
         val todayAffirmation = affirmations[ nextIndex ]
         persistor.saveIndex(LastUsedIndex(nextIndex, today))
         return todayAffirmation
@@ -36,19 +40,15 @@ class Affirmations(
     //  new affirmations will arrive later (new ones will be skipped). So to avoid it let's store valid
     // index all the time
     private fun getAdjustedIndex(loadedIndex: Int, affirmationsSize: Int) : Int {
-        return if (loadedIndex >= affirmationsSize) {
-            loadedIndex % affirmationsSize
-        } else {
-            loadedIndex + 1
-        }
+        return loadedIndex % affirmationsSize
     }
 }
 
 private const val DAY_MILLIS = 86400000
 private fun LastUsedIndex.isToday() : Boolean {
-    val now = System.currentTimeMillis()
+    val now = Calendar.getInstance().timeInMillis
     val todayStart = now - (now % DAY_MILLIS)
-    return this.date >= todayStart
+    return todayStart <= this.date && this.date < todayStart + DAY_MILLIS
 }
 
 interface AffirmationsPersistor {
