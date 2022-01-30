@@ -28,7 +28,7 @@ class Affirmations(
 
         loge("Last used index not found, storing...")
         val today = Calendar.getInstance().timeInMillis
-        val nextIndex = getAdjustedIndex(lastUsedIndex.index, affirmations.size)
+        val nextIndex = getAdjustedIndex(lastUsedIndex.index, affirmations.lastIndex)
         val todayAffirmation = affirmations[ nextIndex ]
         persistor.saveIndex(LastUsedIndex(nextIndex, today))
         return todayAffirmation
@@ -40,7 +40,7 @@ class Affirmations(
     //  new affirmations will arrive later (new ones will be skipped). So to avoid it let's store valid
     // index all the time
     private fun getAdjustedIndex(loadedIndex: Int, affirmationsSize: Int) : Int {
-        return loadedIndex % affirmationsSize
+        return loadedIndex % affirmationsSize + 1
     }
 }
 
