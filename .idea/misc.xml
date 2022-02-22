@@ -9,9 +9,13 @@
         <entry key="../../../../../../layout/compose-model-1640289955181.xml" value="0.3002533783783784" />
         <entry key="../../../../../../layout/compose-model-1640776950765.xml" value="0.30574324324324326" />
         <entry key="../../../../../../layout/compose-model-1640781722264.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.29270833333333335" />
         <entry key="app/src/main/res/drawable/header_icon.xml" value="0.2962962962962963" />
+        <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.29270833333333335" />
         <entry key="app/src/main/res/layout/blur_overlay.xml" value="0.20833333333333334" />
         <entry key="app/src/main/res/layout/time_picker.xml" value="0.2011144883485309" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.32461538461538464" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.29270833333333335" />
       </map>
     </option>
   </component>
